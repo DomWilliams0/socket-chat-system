@@ -1,11 +1,20 @@
 package chatroom.client;
 
-import chatroom.Connection;
+import chatroom.Logger;
+import chatroom.Protocol;
+
+import java.io.*;
+import java.net.Socket;
 
 public class ChatClient
 {
 	private final String username;
-	private Connection connection;
+
+	private Socket socket;
+	private boolean connected;
+
+	private BufferedReader in;
+	private BufferedWriter out;
 
 	/**
 	 * @param username The client's username to use in the chatroom
@@ -13,7 +22,7 @@ public class ChatClient
 	public ChatClient(String username)
 	{
 		this.username = username;
-		this.connection = new Connection(username);
+		this.connected = false;
 
 		// TODO verify username is not null, is minimum length, has no new lines in it etc.
 	}
@@ -27,12 +36,83 @@ public class ChatClient
 	 */
 	public boolean connect(String address, int port)
 	{
-		return connection.connect(address, port);
+		boolean success;
+		try
+		{
+			String addrStr = address + ":" + port;
+
+			Logger.log(String.format("Attempting to connect to %s...", addrStr));
+			socket = new Socket(address, port);
+			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+			success = true;
+
+			connected = true;
+			Logger.log("Successfully connected");
+
+			// join
+			sendJoin();
+
+		} catch (IOException e)
+		{
+			System.err.println("Could not connect to server: " + e.getMessage());
+			success = false;
+		}
+
+		return success;
 	}
+
 
 	public void disconnect()
 	{
 		// TODO
+	}
+
+	private boolean sendCommandPrologue(Protocol.Opcode opcode)
+	{
+		try
+		{
+			ensureConnected();
+
+			// start with opcode
+			out.write(opcode.serialise());
+			out.write(Protocol.DELIMITER);
+
+			// followed by username
+			out.write(username);
+			out.write(Protocol.DELIMITER);
+
+			out.flush();
+
+			// followed by any opcode specific arguments
+		} catch (IOException e)
+		{
+			Logger.error("Failed to send %s command: %s", opcode, e.getMessage());
+			return false;
+		}
+
+		return true;
+	}
+
+	private void sendJoin() throws IOException
+	{
+		// send join command
+		sendCommandPrologue(Protocol.Opcode.JOIN);
+
+		// read banner
+		String banner = in.readLine();
+		display("The server says: %s", banner);
+	}
+
+	/**
+	 * Throws an IllegalStateException if the client is not connected to a server
+	 */
+	private void ensureConnected()
+	{
+		if (!connected)
+		{
+			throw new IllegalStateException("Client is not connected to a server");
+		}
 	}
 
 	/**
@@ -48,9 +128,16 @@ public class ChatClient
 	 */
 	public boolean isConnected()
 	{
-		return connection.isConnected();
+		return connected;
 	}
 
+	/**
+	 * Displays the given message on the UI
+	 */
+	private void display(String message, Object... format)
+	{
+		System.out.printf(message + "\n", format);
+	}
 
 	public static void main(String[] args)
 	{

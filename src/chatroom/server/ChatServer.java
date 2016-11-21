@@ -1,6 +1,6 @@
 package chatroom.server;
 
-import chatroom.Connection;
+import chatroom.Protocol;
 import chatroom.Logger;
 
 import java.io.*;
@@ -30,7 +30,7 @@ public class ChatServer
 
 		// read opcode
 		String opcodeStr = in.readLine();
-		Connection.Opcode opcode = Connection.Opcode.parse(opcodeStr);
+		Protocol.Opcode opcode = Protocol.Opcode.parse(opcodeStr);
 		if (opcode == null)
 		{
 			Logger.error("Invalid opcode %s", opcodeStr);
