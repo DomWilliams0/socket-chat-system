@@ -36,6 +36,7 @@ public class ChatServer
 			throw new ChatException("There is already a client connected with the username '" + username + "'");
 		}
 
+		// spawn thread and store connection
 		ClientConnection client = new ClientConnection(username, in, out);
 		clients.put(username, client);
 	}

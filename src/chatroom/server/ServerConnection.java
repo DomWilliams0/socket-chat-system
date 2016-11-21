@@ -72,7 +72,7 @@ public class ServerConnection
 
 	private void handleSend(String username, BufferedReader in, BufferedWriter out)
 	{
-		// TODO
+		// TODO this should not happen
 	}
 
 	private void handleJoin(String username, BufferedReader in, BufferedWriter out) throws IOException
