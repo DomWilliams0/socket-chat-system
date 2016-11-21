@@ -1,17 +1,11 @@
 package chatroom.client;
 
-import java.io.*;
-import java.net.Socket;
+import chatroom.Connection;
 
 public class ChatClient
 {
-	private String username;
-
-	private Socket socket;
-	private boolean connected;
-
-	private BufferedReader sockIn;
-	private BufferedWriter sockOut;
+	private final String username;
+	private Connection connection;
 
 	/**
 	 * @param username The client's username to use in the chatroom
@@ -19,8 +13,7 @@ public class ChatClient
 	public ChatClient(String username)
 	{
 		this.username = username;
-		this.socket = null;
-		this.connected = false;
+		this.connection = new Connection(username);
 
 		// TODO verify username is not null, is minimum length, has no new lines in it etc.
 	}
@@ -34,44 +27,12 @@ public class ChatClient
 	 */
 	public boolean connect(String address, int port)
 	{
-		boolean success;
-		try
-		{
-			String addrStr = address + ":" + port;
-
-			log(String.format("Attempting to connect to %s...", addrStr));
-			socket = new Socket(address, port);
-			sockIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			sockOut = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-			success = true;
-
-			log("Successfully connected");
-
-			// TODO send join command
-
-		} catch (IOException e)
-		{
-			System.err.println("Could not connect to server: " + e.getMessage());
-			success = false;
-		}
-
-		return success;
+		return connection.connect(address, port);
 	}
 
 	public void disconnect()
 	{
 		// TODO
-	}
-
-	/**
-	 * Throws an IllegalStateException if the client is not connected to a server
-	 */
-	private void ensureConnected()
-	{
-		if (!isConnected())
-		{
-			throw new IllegalStateException("Client is not connected to a server");
-		}
 	}
 
 	/**
@@ -87,29 +48,14 @@ public class ChatClient
 	 */
 	public boolean isConnected()
 	{
-		return connected;
+		return connection.isConnected();
 	}
 
-
-	/**
-	 * Helper method for consistent error logging
-	 */
-	private void error(String message, Object... format)
-	{
-		System.err.printf("[ERR] " + message + "\n", format);
-	}
-
-	/**
-	 * Helper method for consistent logging
-	 */
-	private void log(String message, Object... format)
-	{
-		System.out.printf("[LOG] " + message + "\n", format);
-	}
 
 	public static void main(String[] args)
 	{
 		ChatClient client = new ChatClient("user");
-		client.connect("localhost", 6060);
+		boolean success = client.connect("localhost", 6060);
+		System.out.println("success = " + success);
 	}
 }
