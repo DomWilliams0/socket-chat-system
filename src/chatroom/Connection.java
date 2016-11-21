@@ -18,8 +18,13 @@ public class Connection
 
 		public static Opcode parse(String s)
 		{
-			// TODO test
-			return Opcode.valueOf(s);
+			try
+			{
+				return Opcode.valueOf(s);
+			} catch (IllegalArgumentException e)
+			{
+				return null;
+			}
 		}
 	}
 
@@ -68,10 +73,13 @@ public class Connection
 		return success;
 	}
 
-	private void sendJoin()
+	private void sendJoin() throws IOException
 	{
 		sendCommandPrologue(Opcode.JOIN);
-		// no further args
+
+		// read banner
+		String banner = in.readLine();
+		System.out.println("The server says: " + banner);
 	}
 
 	private void sendCommandPrologue(Opcode opcode)
