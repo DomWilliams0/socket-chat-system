@@ -46,6 +46,7 @@ public class ServerConnection
 
 			// send actual message
 			out.write(message.getContent());
+			out.write(Protocol.DELIMITER);
 			out.flush();
 
 		} catch (IOException e)

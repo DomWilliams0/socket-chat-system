@@ -29,7 +29,7 @@ public class ServerMessageReceiver implements Runnable
 			String username = clientInstance.getUsername();
 
 			// read opcode
-			String opcodeStr = null;
+			String opcodeStr;
 			try
 			{
 				// read opcode

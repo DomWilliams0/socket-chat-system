@@ -1,8 +1,6 @@
 package chatroom.server;
 
 import chatroom.Logger;
-import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
-import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 public class Message
 {
@@ -27,15 +25,17 @@ public class Message
 		return from;
 	}
 
-	public String decode()
+	public void decode()
 	{
 		try
 		{
-			return new String(Base64.decode(content));
-		} catch (Base64DecodingException e)
+			content = new String(java.util.Base64.getDecoder().decode(content));
+		} catch (IllegalArgumentException e)
 		{
 			Logger.error("Failed to decode message: %s", e.getMessage());
-			return "<INVALID MESSAGE>";
+			content = "<INVALID MESSAGE>";
 		}
 	}
+
+
 }

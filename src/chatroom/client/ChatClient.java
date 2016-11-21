@@ -2,10 +2,11 @@ package chatroom.client;
 
 import chatroom.Logger;
 import chatroom.Protocol;
-import com.sun.org.apache.xml.internal.security.utils.Base64;
+import chatroom.server.Message;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Base64;
 import java.util.Scanner;
 
 public class ChatClient
@@ -80,7 +81,7 @@ public class ChatClient
 		sendCommandPrologue(Protocol.Opcode.SEND);
 
 		// encode message in base64
-		String encoded = Base64.encode(message.getBytes());
+		String encoded = Base64.getEncoder().encodeToString(message.getBytes());
 
 		try
 		{
@@ -201,6 +202,9 @@ public class ChatClient
 		// register signal handler
 		Runtime.getRuntime().addShutdownHook(new Thread(this::disconnect));
 
+		// start receiving thread
+		startReceivingThread();
+
 		// send messages
 		display("Type /quit to exit");
 		Scanner scanner = new Scanner(System.in);
@@ -221,6 +225,28 @@ public class ChatClient
 		disconnect();
 
 		return true;
+	}
+
+	private void startReceivingThread()
+	{
+		Thread thread = new Thread(new ClientMessageReceiver(this));
+		thread.setDaemon(true);
+		thread.start();
+	}
+
+	public BufferedReader getIn()
+	{
+		return in;
+	}
+
+	public BufferedWriter getOut()
+	{
+		return out;
+	}
+
+	public void onReceiveMessage(Message m)
+	{
+		display("[%s]: %s", m.getFrom(), m.getContent());
 	}
 
 	public static void main(String[] args)
