@@ -9,7 +9,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 
-public class ClientConnection
+class ClientConnection
 {
 	private final String username;
 	private final BufferedReader in;
@@ -18,7 +18,7 @@ public class ClientConnection
 
 	private boolean running;
 
-	public ClientConnection(String username, BufferedReader in, BufferedWriter out)
+	ClientConnection(String username, BufferedReader in, BufferedWriter out, ChatServer serverInstance)
 	{
 		this.username = username;
 		this.in = in;
@@ -26,7 +26,6 @@ public class ClientConnection
 		this.running = true;
 		thread = new Thread(() ->
 		{
-
 			// wait for messages
 			while (running)
 			{
@@ -36,19 +35,36 @@ public class ClientConnection
 				String opcodeStr = null;
 				try
 				{
-					// read SEND opcode
+					// read opcode
 					opcodeStr = in.readLine();
-					if (!opcodeStr.equals(Protocol.Opcode.SEND.serialise()))
+
+					if (opcodeStr == null)
 					{
-						Logger.error("Expected message opcode, got '%s' instead", opcodeStr);
-						continue;
+						Logger.error("Read error");
+						return;
 					}
+
+					Protocol.Opcode opcode = Protocol.Opcode.parse(opcodeStr);
 
 					// read username and ensure it's correct
 					String usernameStr = in.readLine();
 					if (!username.equals(usernameStr))
 					{
-						Logger.error("User '%s' tried sending a message as '%s', uh oh", username, usernameStr);
+						Logger.error("User '%s' tried sending a command as '%s', uh oh", username, usernameStr);
+						continue;
+					}
+
+					// delegate quit message
+					if (opcode == Protocol.Opcode.QUIT)
+					{
+						serverInstance.removeClient(username);
+						return;
+					}
+
+					// invalid opcode
+					else if (opcode != Protocol.Opcode.SEND)
+					{
+						Logger.error("Expected send opcode, but received '%s' from client '%s'", opcodeStr, username);
 						continue;
 					}
 
@@ -95,5 +111,11 @@ public class ClientConnection
 	public Thread getThread()
 	{
 		return thread;
+	}
+
+	public void stop()
+	{
+		running = false;
+		// TODO interrupt?
 	}
 }

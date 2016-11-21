@@ -1,6 +1,7 @@
 package chatroom.server;
 
 import chatroom.ChatException;
+import chatroom.Logger;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -38,8 +39,10 @@ public class ChatServer
 		}
 
 		// spawn thread and store connection
-		ClientConnection client = new ClientConnection(username, in, out);
+		ClientConnection client = new ClientConnection(username, in, out, this);
 		clients.put(username, client);
+
+		Logger.log("%s connected", username);
 	}
 
 	public void removeClient(String username)
@@ -47,6 +50,7 @@ public class ChatServer
 		ClientConnection connection = clients.remove(username);
 		if (connection != null)
 		{
+			Logger.log("%s disconnected", username);
 			try
 			{
 				connection.getIn().close();
