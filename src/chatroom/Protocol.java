@@ -6,7 +6,10 @@ public class Protocol
 	{
 		JOIN,
 		SEND,
-		QUIT;
+		QUIT,
+
+		SUCC, // success
+		ERRO; // error + message
 
 		public String serialise()
 		{

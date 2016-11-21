@@ -51,7 +51,7 @@ public class ChatClient
 			Logger.log("Successfully connected");
 
 			// join
-			sendJoin();
+			success = sendJoin();
 
 		} catch (IOException e)
 		{
@@ -94,14 +94,58 @@ public class ChatClient
 		return true;
 	}
 
-	private void sendJoin() throws IOException
+	private String readAck()
+	{
+		try
+		{
+			ensureConnected();
+
+			String opcodeStr = in.readLine();
+			Protocol.Opcode opcode = Protocol.Opcode.parse(opcodeStr);
+
+			// success, phew
+			if (opcode == Protocol.Opcode.SUCC)
+			{
+				return null;
+			}
+
+			// error, oh dear
+			if (opcode == Protocol.Opcode.ERRO)
+			{
+				return in.readLine();
+			}
+
+			// something else
+			return "Invalid ack opcode '" + opcodeStr + "'";
+
+
+		} catch (IOException e)
+		{
+			return "Failed to read ack: " + e.getMessage();
+		}
+	}
+
+	private boolean sendJoin() throws IOException
 	{
 		// send join command
 		sendCommandPrologue(Protocol.Opcode.JOIN);
 
+		// read ack
+		String ack = readAck();
+
+		// error
+		if (ack != null)
+		{
+			display("Error while connecting: %s", ack);
+			return false;
+		}
+
+
 		// read banner
 		String banner = in.readLine();
 		display("The server says: %s", banner);
+
+		return true;
 	}
 
 	/**

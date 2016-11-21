@@ -1,5 +1,6 @@
 package chatroom.server;
 
+import chatroom.ChatException;
 import chatroom.Logger;
 import chatroom.Protocol;
 
@@ -76,8 +77,49 @@ public class ServerConnection
 
 	private void handleJoin(String username, BufferedReader in, BufferedWriter out) throws IOException
 	{
+		String error = null;
+
+		// send ack
+		try
+		{
+			server.addClient(username, in, out);
+		} catch (ChatException e)
+		{
+			error = e.getMessage();
+		}
+
+		sendResponse(error, out);
+
+		// error; abort
+		if (error != null)
+		{
+			return;
+		}
+
 		// send banner
-		out.write(server.getBanner() + "\n");
+		out.write(server.getBanner() + Protocol.DELIMITER);
+		out.flush();
+	}
+
+	private void sendResponse(String error, BufferedWriter out) throws IOException
+	{
+		// success
+		if (error == null)
+		{
+			out.write(Protocol.Opcode.SUCC.serialise());
+			out.write(Protocol.DELIMITER);
+		}
+
+		// error
+		else
+		{
+			out.write(Protocol.Opcode.ERRO.serialise());
+			out.write(Protocol.DELIMITER);
+
+			out.write(error);
+			out.write(Protocol.DELIMITER);
+		}
+
 		out.flush();
 	}
 
