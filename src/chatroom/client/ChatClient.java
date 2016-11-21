@@ -217,6 +217,12 @@ public class ChatClient
 				break;
 			}
 
+			// empty
+			if (line.isEmpty())
+			{
+				continue;
+			}
+
 			// send message
 			sendMessage(line);
 		}
