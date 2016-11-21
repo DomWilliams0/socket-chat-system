@@ -214,6 +214,9 @@ public class ChatClient
 			return false;
 		}
 
+		// register signal handler
+		Runtime.getRuntime().addShutdownHook(new Thread(this::disconnect));
+
 		// send messages
 		display("Type /quit to exit");
 		Scanner scanner = new Scanner(System.in);
