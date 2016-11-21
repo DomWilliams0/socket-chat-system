@@ -32,50 +32,38 @@ public class ServerConnection
 		}
 	}
 
-	private void handleConnection(Socket client) throws IOException
+	/**
+	 * @return True if the handshake was successful, and the socket should be kept open
+	 */
+	private boolean handleConnection(Socket client) throws IOException
 	{
 		BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
 
 		// read opcode
 		String opcodeStr = in.readLine();
-		Protocol.Opcode opcode = Protocol.Opcode.parse(opcodeStr);
-		if (opcode == null)
+		if (!opcodeStr.equals(Protocol.Opcode.JOIN.serialise()))
 		{
-			Logger.error("Invalid opcode %s", opcodeStr);
-			return;
+			Logger.error("Expected join opcode in main thread, received '%s' instead", opcodeStr);
+			return false;
 		}
 
 		// read username
 		String username = in.readLine();
 		Logger.log("User '%s' connected from %s", username, getClientAddress(client));
 
-		// deal with opcode
-		switch (opcode)
-		{
-			case JOIN:
-				handleJoin(username, in, out);
-				break;
-			case SEND:
-				handleSend(username, in, out);
-				break;
-			case QUIT:
-				handleQuit(username, in, out);
-				break;
-		}
+		return handleJoin(username, in, out);
 	}
 
-	private void handleQuit(String username, BufferedReader in, BufferedWriter out)
+	private void handleQuit(String username, BufferedReader in, BufferedWriter out) throws IOException
 	{
-		// TODO
+		server.removeClient(username);
 	}
 
-	private void handleSend(String username, BufferedReader in, BufferedWriter out)
-	{
-		// TODO this should not happen
-	}
-
-	private void handleJoin(String username, BufferedReader in, BufferedWriter out) throws IOException
+	/**
+	 * @return True if the handshake was successful, and the socket should be kept open
+	 */
+	private boolean handleJoin(String username, BufferedReader in, BufferedWriter out) throws IOException
 	{
 		String error = null;
 
@@ -93,12 +81,13 @@ public class ServerConnection
 		// error; abort
 		if (error != null)
 		{
-			return;
+			return false;
 		}
 
 		// send banner
 		out.write(server.getBanner() + Protocol.DELIMITER);
 		out.flush();
+		return true;
 	}
 
 	private void sendResponse(String error, BufferedWriter out) throws IOException
@@ -127,16 +116,18 @@ public class ServerConnection
 	private boolean acceptClient()
 	{
 		Socket client = null;
+		boolean maintainConnection = false;
 
 		try
 		{
-			// TODO extract to ServerConnection?
 			client = socket.accept();
-			handleConnection(client);
+			maintainConnection = handleConnection(client);
 		} catch (IOException e)
 		{
 			Logger.error("Failed to handle client: %s", e.getMessage());
-		} finally
+		}
+
+		if (!maintainConnection)
 		{
 			if (client != null && !client.isClosed())
 			{
@@ -149,7 +140,6 @@ public class ServerConnection
 				}
 			}
 		}
-
 
 		return true;
 	}

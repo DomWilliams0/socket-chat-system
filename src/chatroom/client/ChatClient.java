@@ -2,9 +2,11 @@ package chatroom.client;
 
 import chatroom.Logger;
 import chatroom.Protocol;
+import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class ChatClient
 {
@@ -65,7 +67,28 @@ public class ChatClient
 
 	public void disconnect()
 	{
-		// TODO
+		Logger.log("Disconnecting");
+		sendCommandPrologue(Protocol.Opcode.QUIT);
+	}
+
+	public void sendMessage(String message)
+	{
+		sendCommandPrologue(Protocol.Opcode.SEND);
+
+		// encode message in base64
+		String encoded = Base64.encode(message.getBytes());
+
+		try
+		{
+			out.write(encoded);
+			out.write("\n");
+			out.flush();
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		// no ack needed for now
 	}
 
 	private boolean sendCommandPrologue(Protocol.Opcode opcode)
@@ -183,10 +206,41 @@ public class ChatClient
 		System.out.printf(message + "\n", format);
 	}
 
+	public boolean start(String localhost, int port)
+	{
+		// connect to server
+		if (!connect(localhost, port))
+		{
+			return false;
+		}
+
+		// send messages
+		display("Type /quit to exit");
+		Scanner scanner = new Scanner(System.in);
+		String line;
+		while ((line = scanner.nextLine()) != null)
+		{
+			// quit
+			if (line.equals("/quit"))
+			{
+				break;
+			}
+
+			// send message
+			sendMessage(line);
+		}
+
+		// disconnect
+		disconnect();
+
+		return true;
+	}
+
 	public static void main(String[] args)
 	{
 		ChatClient client = new ChatClient("user");
-		boolean success = client.connect("localhost", 6060);
-		System.out.println("success = " + success);
+		boolean success = client.start("localhost", 6060);
+
+		System.exit(success ? 0 : 1);
 	}
 }

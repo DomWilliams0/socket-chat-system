@@ -4,6 +4,7 @@ import chatroom.ChatException;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,6 +40,28 @@ public class ChatServer
 		// spawn thread and store connection
 		ClientConnection client = new ClientConnection(username, in, out);
 		clients.put(username, client);
+	}
+
+	public void removeClient(String username)
+	{
+		ClientConnection connection = clients.remove(username);
+		if (connection != null)
+		{
+			try
+			{
+				connection.getIn().close();
+			} catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+			try
+			{
+				connection.getOut().close();
+			} catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public static void main(String[] args)
