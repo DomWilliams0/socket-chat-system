@@ -238,7 +238,13 @@ public class ChatClient
 
 	public static void main(String[] args)
 	{
-		ChatClient client = new ChatClient("user");
+		if (args.length != 1)
+		{
+			Logger.error("Username expected");
+			System.exit(1);
+		}
+
+		ChatClient client = new ChatClient(args[0]);
 		boolean success = client.start("localhost", 6060);
 
 		System.exit(success ? 0 : 1);
