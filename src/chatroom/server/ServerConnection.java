@@ -32,6 +32,28 @@ public class ServerConnection
 		}
 	}
 
+	static void broadcastMessage(ClientConnection client, Message message)
+	{
+		try
+		{
+			BufferedWriter out = client.getOut();
+
+			// send message command
+			if (!Protocol.sendCommandPrologue(Protocol.Opcode.SEND, message.getFrom(), out))
+			{
+				return;
+			}
+
+			// send actual message
+			out.write(message.getContent());
+			out.flush();
+
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
 	/**
 	 * @return True if the handshake was successful, and the socket should be kept open
 	 */
@@ -53,11 +75,6 @@ public class ServerConnection
 		Logger.log("User '%s' connected from %s", username, getClientAddress(client));
 
 		return handleJoin(username, in, out);
-	}
-
-	private void handleQuit(String username, BufferedReader in, BufferedWriter out) throws IOException
-	{
-		server.removeClient(username);
 	}
 
 	/**

@@ -2,8 +2,6 @@ package chatroom.server;
 
 import chatroom.Logger;
 import chatroom.Protocol;
-import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
-import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -70,19 +68,11 @@ class ClientConnection
 
 					// read message
 					String encoded = in.readLine();
-					String decoded = new String(Base64.decode(encoded));
-
-					System.out.println("decoded = " + decoded);
-
-					// TODO decode and process message
+					serverInstance.broadcastMessage(username, encoded);
 
 				} catch (IOException e)
 				{
-					e.printStackTrace();
-					return;
-				} catch (Base64DecodingException e)
-				{
-					Logger.error("Badly encoded message received");
+					Logger.error(e.getMessage());
 					return;
 				}
 

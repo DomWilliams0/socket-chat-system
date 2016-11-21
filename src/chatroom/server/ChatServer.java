@@ -68,6 +68,15 @@ public class ChatServer
 		}
 	}
 
+	public void broadcastMessage(String username, String message)
+	{
+		Message m = new Message(username, message);
+		for (ClientConnection client : clients.values())
+		{
+			ServerConnection.broadcastMessage(client, m);
+		}
+	}
+
 	public static void main(String[] args)
 	{
 		ChatServer server = new ChatServer("Welcome!");

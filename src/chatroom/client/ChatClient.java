@@ -67,8 +67,12 @@ public class ChatClient
 
 	public void disconnect()
 	{
-		Logger.log("Disconnecting");
-		sendCommandPrologue(Protocol.Opcode.QUIT);
+		if (connected)
+		{
+			Logger.log("Disconnecting");
+			sendCommandPrologue(Protocol.Opcode.QUIT);
+			connected = false;
+		}
 	}
 
 	public void sendMessage(String message)
@@ -93,28 +97,8 @@ public class ChatClient
 
 	private boolean sendCommandPrologue(Protocol.Opcode opcode)
 	{
-		try
-		{
-			ensureConnected();
-
-			// start with opcode
-			out.write(opcode.serialise());
-			out.write(Protocol.DELIMITER);
-
-			// followed by username
-			out.write(username);
-			out.write(Protocol.DELIMITER);
-
-			out.flush();
-
-			// followed by any opcode specific arguments
-		} catch (IOException e)
-		{
-			Logger.error("Failed to send %s command: %s", opcode, e.getMessage());
-			return false;
-		}
-
-		return true;
+		ensureConnected();
+		return Protocol.sendCommandPrologue(opcode, username, out);
 	}
 
 	private String readAck()
