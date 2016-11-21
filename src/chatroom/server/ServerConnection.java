@@ -32,7 +32,7 @@ public class ServerConnection
 		}
 	}
 
-	static void broadcastMessage(ClientConnection client, Message message)
+	static void broadcastMessage(ClientInstance client, Message message)
 	{
 		try
 		{

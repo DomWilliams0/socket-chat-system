@@ -12,7 +12,7 @@ import java.util.Map;
 public class ChatServer
 {
 	private final String banner;
-	private final Map<String, ClientConnection> clients;
+	private final Map<String, ClientInstance> clients;
 
 	public ChatServer(String banner)
 	{
@@ -39,7 +39,7 @@ public class ChatServer
 		}
 
 		// spawn thread and store connection
-		ClientConnection client = new ClientConnection(username, in, out, this);
+		ClientInstance client = new ClientInstance(username, in, out, this);
 		clients.put(username, client);
 
 		Logger.log("%s connected", username);
@@ -47,7 +47,7 @@ public class ChatServer
 
 	public void removeClient(String username)
 	{
-		ClientConnection connection = clients.remove(username);
+		ClientInstance connection = clients.remove(username);
 		if (connection != null)
 		{
 			Logger.log("%s disconnected", username);
@@ -71,7 +71,7 @@ public class ChatServer
 	public void broadcastMessage(String username, String message)
 	{
 		Message m = new Message(username, message);
-		for (ClientConnection client : clients.values())
+		for (ClientInstance client : clients.values())
 		{
 			ServerConnection.broadcastMessage(client, m);
 		}

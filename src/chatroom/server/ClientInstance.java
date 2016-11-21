@@ -7,7 +7,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 
-class ClientConnection
+class ClientInstance
 {
 	private final String username;
 	private final BufferedReader in;
@@ -16,7 +16,7 @@ class ClientConnection
 
 	private boolean running;
 
-	ClientConnection(String username, BufferedReader in, BufferedWriter out, ChatServer serverInstance)
+	ClientInstance(String username, BufferedReader in, BufferedWriter out, ChatServer serverInstance)
 	{
 		this.username = username;
 		this.in = in;
