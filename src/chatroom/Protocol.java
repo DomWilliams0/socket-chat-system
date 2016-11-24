@@ -35,6 +35,7 @@ public class Protocol
 	}
 
 	public static final String DELIMITER = "\n";
+	public static final String SERVER_USERNAME = "SERVER";
 
 	public static boolean sendCommandPrologue(RequestPrologue prologue, Writer out)
 	{

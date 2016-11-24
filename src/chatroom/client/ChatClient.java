@@ -47,7 +47,6 @@ public class ChatClient
 			socket = new Socket(address, port);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-			success = true;
 
 			connected = true;
 			Logger.log("Successfully connected");

@@ -2,6 +2,7 @@ package chatroom.server;
 
 import chatroom.ChatException;
 import chatroom.Logger;
+import chatroom.Protocol;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -38,6 +39,8 @@ public class ChatServer
 			throw new ChatException("There is already a client connected with the username '" + username + "'");
 		}
 
+		broadcastServerMessage(username + " joined");
+
 		// spawn thread and store connection
 		ClientInstance client = new ClientInstance(username, in, out, this);
 		clients.put(username, client);
@@ -50,6 +53,7 @@ public class ChatServer
 		ClientInstance connection = clients.remove(username);
 		if (connection != null)
 		{
+			broadcastServerMessage(username + " quit");
 			Logger.log("%s disconnected", username);
 			try
 			{
@@ -68,7 +72,12 @@ public class ChatServer
 		}
 	}
 
-	public void broadcastMessage(String username, String message)
+	public void broadcastServerMessage(String message)
+	{
+		broadcastEncodedMessage(Protocol.SERVER_USERNAME, Protocol.encodeMessage(message));
+	}
+
+	public void broadcastEncodedMessage(String username, String message)
 	{
 		Message m = new Message(username, message);
 		for (ClientInstance client : clients.values())

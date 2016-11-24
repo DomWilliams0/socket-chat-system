@@ -52,7 +52,7 @@ public class ServerMessageReceiver implements Runnable
 					{
 						// read message and send to all clients
 						String encoded = in.readLine();
-						serverInstance.broadcastMessage(username, encoded);
+						serverInstance.broadcastEncodedMessage(username, encoded);
 
 					} catch (IOException e)
 					{
