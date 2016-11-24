@@ -7,13 +7,16 @@ import chatroom.shared.protocol.Protocol;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ChatServer
 {
 	private final String banner;
 	private final Map<String, ClientInstance> clients;
+	private final List<Message> messageHistory;
 
 	public ChatServer(String banner)
 	{
@@ -24,6 +27,7 @@ public class ChatServer
 
 		this.banner = banner;
 		this.clients = new HashMap<>();
+		this.messageHistory = new ArrayList<>();
 	}
 
 	public static boolean runServer(int port, String banner)
@@ -92,6 +96,8 @@ public class ChatServer
 	{
 		for (ClientInstance client : clients.values())
 			ServerConnection.sendMessageToClient(client, message);
+
+		messageHistory.add(message);
 	}
 
 	public int getUserCount()
@@ -106,5 +112,10 @@ public class ChatServer
 		clients.keySet().forEach(name -> sb.append(name).append(delimiter));
 
 		return sb.toString().trim();
+	}
+
+	public List<Message> getMessageHistory()
+	{
+		return messageHistory;
 	}
 }

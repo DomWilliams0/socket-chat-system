@@ -33,7 +33,7 @@ public class ServerMessageReceiver implements Runnable
 			try
 			{
 				RequestPrologue request = Command.readPrologue(in,
-					Opcode.QUIT, Opcode.SEND, Opcode.LIST);
+					Opcode.QUIT, Opcode.SEND, Opcode.LIST, Opcode.HIST);
 
 				// validate sender
 				if (!username.equals(request.getUsername()))
@@ -53,13 +53,15 @@ public class ServerMessageReceiver implements Runnable
 					case SEND:
 						// read message and send to all clients
 						Message m = CommandSend.readMessageFromClient(in, username);
-//						serverInstance.broadcastEncodedMessage(username, Command.readArgument(in));
 						serverInstance.broadcastMessage(m);
 						break;
 
 					case LIST:
 						CommandList.sendUserList(out, serverInstance);
 						break;
+
+					case HIST:
+						CommandClientHistory.sendChatHistory(out, serverInstance);
 				}
 			} catch (ChatException e)
 			{

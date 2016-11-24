@@ -7,6 +7,7 @@ import chatroom.shared.protocol.*;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.List;
 import java.util.Scanner;
 
 public class ChatClient
@@ -63,7 +64,8 @@ public class ChatClient
 			// request user list
 			sendList();
 
-			// TODO request history
+			// request history
+			sendHistory();
 
 			success = true;
 		} catch (IOException e)
@@ -138,6 +140,15 @@ public class ChatClient
 
 		String list = command.read(in);
 		display(list);
+	}
+
+	private void sendHistory() throws ChatException
+	{
+		CommandClientHistory command = new CommandClientHistory(username);
+		command.send(out);
+
+		List<Message> messages = command.readAndParse(in);
+		messages.forEach(this::onReceiveMessage);
 	}
 
 	/**
