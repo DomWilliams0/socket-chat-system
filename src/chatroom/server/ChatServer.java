@@ -77,13 +77,11 @@ public class ChatServer
 		}
 	}
 
-	public static void main(String[] args)
+	public static boolean runServer(int port, String banner)
 	{
-		ChatServer server = new ChatServer("Welcome!");
+		ChatServer server = new ChatServer(banner);
 		ServerConnection serverConnection = new ServerConnection(server);
-		int port = 6060;
 
-		boolean success = serverConnection.startListening(port);
-		System.exit(success ? 0 : 1);
+		return serverConnection.startListening(port);
 	}
 }

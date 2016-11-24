@@ -58,7 +58,7 @@ public class ChatClient
 
 		} catch (IOException e)
 		{
-			System.err.println("Could not connect to server: " + e.getMessage());
+			Logger.error("Could not connect to server: %s", e.getMessage());
 			success = false;
 		}
 
@@ -189,10 +189,10 @@ public class ChatClient
 		System.out.printf(message + "\n", format);
 	}
 
-	public boolean start(String localhost, int port)
+	public boolean start(String address, int port)
 	{
 		// connect to server
-		if (!connect(localhost, port))
+		if (!connect(address, port))
 		{
 			return false;
 		}
@@ -253,17 +253,9 @@ public class ChatClient
 		display("[%s]: %s", m.getFrom(), m.getContent());
 	}
 
-	public static void main(String[] args)
+	public static boolean runClient(String address, int port, String username)
 	{
-		if (args.length != 1)
-		{
-			Logger.error("Username expected");
-			System.exit(1);
-		}
-
-		ChatClient client = new ChatClient(args[0]);
-		boolean success = client.start("localhost", 6060);
-
-		System.exit(success ? 0 : 1);
+		ChatClient client = new ChatClient(username);
+		return client.start(address, port);
 	}
 }
