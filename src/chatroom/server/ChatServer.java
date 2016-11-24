@@ -4,9 +4,7 @@ import chatroom.shared.ChatException;
 import chatroom.shared.Logger;
 import chatroom.shared.protocol.Protocol;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +12,9 @@ import java.util.Map;
 
 public class ChatServer
 {
+	private static final String CHAT_HISTORY_FILE = "chat_history.ser";
+	private static final int HISTORY_BUFFER_SIZE = 5;
+
 	private final String banner;
 	private final Map<String, ClientInstance> clients;
 	private final List<Message> messageHistory;
@@ -28,6 +29,10 @@ public class ChatServer
 		this.banner = banner;
 		this.clients = new HashMap<>();
 		this.messageHistory = new ArrayList<>();
+
+		loadChatHistory();
+
+		Runtime.getRuntime().addShutdownHook(new Thread(this::saveChatHistory));
 	}
 
 	public static boolean runServer(int port, String banner)
@@ -97,7 +102,15 @@ public class ChatServer
 		for (ClientInstance client : clients.values())
 			ServerConnection.sendMessageToClient(client, message);
 
+		addMessageToHistory(message);
+	}
+
+	private void addMessageToHistory(Message message)
+	{
 		messageHistory.add(message);
+
+		if (messageHistory.size() % HISTORY_BUFFER_SIZE == 0)
+			saveChatHistory();
 	}
 
 	public int getUserCount()
@@ -117,5 +130,38 @@ public class ChatServer
 	public List<Message> getMessageHistory()
 	{
 		return messageHistory;
+	}
+
+	public void saveChatHistory()
+	{
+		try
+		{
+			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(CHAT_HISTORY_FILE, false));
+			oos.writeObject(messageHistory);
+			oos.close();
+			Logger.log("Saved %d messages from chat history to %s", messageHistory.size(), CHAT_HISTORY_FILE);
+
+		} catch (IOException e)
+		{
+			Logger.error("Failed to save chat history: %s", e.getMessage());
+		}
+	}
+
+	public void loadChatHistory()
+	{
+		try
+		{
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(CHAT_HISTORY_FILE));
+
+			ArrayList<Message> newHistory = (ArrayList<Message>) ois.readObject();
+			messageHistory.clear();
+			messageHistory.addAll(newHistory);
+			Logger.log("Loaded %d messages into chat history from %s", newHistory.size(), CHAT_HISTORY_FILE);
+
+			ois.close();
+		} catch (IOException | ClassNotFoundException e)
+		{
+			Logger.error("Failed to load chat history: %s", e.getMessage());
+		}
 	}
 }

@@ -2,7 +2,9 @@ package chatroom.server;
 
 import chatroom.shared.protocol.Protocol;
 
-public class Message
+import java.io.Serializable;
+
+public class Message implements Serializable
 {
 	private String from;
 	private String content;
