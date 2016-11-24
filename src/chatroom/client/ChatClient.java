@@ -6,7 +6,6 @@ import chatroom.server.Message;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Base64;
 import java.util.Scanner;
 
 public class ChatClient
@@ -80,8 +79,7 @@ public class ChatClient
 	{
 		sendCommandPrologue(Protocol.Opcode.SEND);
 
-		// encode message in base64
-		String encoded = Base64.getEncoder().encodeToString(message.getBytes());
+		String encoded = Protocol.encodeMessage(message);
 
 		try
 		{

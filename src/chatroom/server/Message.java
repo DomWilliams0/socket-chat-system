@@ -1,6 +1,6 @@
 package chatroom.server;
 
-import chatroom.Logger;
+import chatroom.Protocol;
 
 public class Message
 {
@@ -27,14 +27,7 @@ public class Message
 
 	public void decode()
 	{
-		try
-		{
-			content = new String(java.util.Base64.getDecoder().decode(content));
-		} catch (IllegalArgumentException e)
-		{
-			Logger.error("Failed to decode message: %s", e.getMessage());
-			content = "<INVALID MESSAGE>";
-		}
+		content = Protocol.decodeMessage(content);
 	}
 
 
