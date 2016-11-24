@@ -28,51 +28,38 @@ public class ServerMessageReceiver implements Runnable
 			BufferedReader in = clientInstance.getIn();
 			String username = clientInstance.getUsername();
 
-			// read opcode
-			String opcodeStr;
-			try
-			{
-				// read opcode
-				opcodeStr = in.readLine();
-
-				if (opcodeStr == null)
-				{
-					Logger.error("Read error");
-					return;
-				}
-
-				Protocol.Opcode opcode = Protocol.Opcode.parse(opcodeStr);
-
-				// read username and ensure it's correct
-				String usernameStr = in.readLine();
-				if (!username.equals(usernameStr))
-				{
-					Logger.error("User '%s' tried sending a command as '%s', uh oh", username, usernameStr);
-					continue;
-				}
-
-				// delegate quit message
-				if (opcode == Protocol.Opcode.QUIT)
-				{
-					serverInstance.removeClient(username);
-					return;
-				}
-
-				// invalid opcode
-				else if (opcode != Protocol.Opcode.SEND)
-				{
-					Logger.error("Expected send opcode, but received '%s' from client '%s'", opcodeStr, username);
-					continue;
-				}
-
-				// read message
-				String encoded = in.readLine();
-				serverInstance.broadcastMessage(username, encoded);
-
-			} catch (IOException e)
-			{
-				Logger.error(e.getMessage());
+			Protocol.RequestPrologue request = Protocol.readCommandPrologue(in, Protocol.Opcode.QUIT, Protocol.Opcode.SEND);
+			if (request == null)
 				return;
+
+			// validate sender
+			if (!username.equals(request.getUsername()))
+			{
+				Logger.error("User '%s' tried sending a command as '%s', uh oh", username, request.getUsername());
+				continue;
+			}
+
+			// handle opcode
+			switch (request.getOpcode())
+			{
+				case QUIT:
+					// delegate quit message
+					serverInstance.removeClient(username);
+					break;
+
+				case SEND:
+					try
+					{
+						// read message and send to all clients
+						String encoded = in.readLine();
+						serverInstance.broadcastMessage(username, encoded);
+
+					} catch (IOException e)
+					{
+						Logger.error(e.getMessage());
+						return;
+					}
+					break;
 			}
 
 		}

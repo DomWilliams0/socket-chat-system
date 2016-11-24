@@ -99,7 +99,8 @@ public class ChatClient
 	private boolean sendCommandPrologue(Protocol.Opcode opcode)
 	{
 		ensureConnected();
-		return Protocol.sendCommandPrologue(opcode, username, out);
+		Protocol.RequestPrologue prologue = new Protocol.RequestPrologue(opcode, username);
+		return Protocol.sendCommandPrologue(prologue, out);
 	}
 
 	private String readAck()
@@ -148,7 +149,6 @@ public class ChatClient
 			return false;
 		}
 
-
 		// read banner
 		String banner = in.readLine();
 		display("The server says: %s", banner);
@@ -162,9 +162,7 @@ public class ChatClient
 	private void ensureConnected()
 	{
 		if (!connected)
-		{
 			throw new IllegalStateException("Client is not connected to a server");
-		}
 	}
 
 	/**

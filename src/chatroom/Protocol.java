@@ -1,7 +1,9 @@
 package chatroom;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Arrays;
 
 public class Protocol
 {
@@ -33,16 +35,16 @@ public class Protocol
 
 	public static final String DELIMITER = "\n";
 
-	public static boolean sendCommandPrologue(Opcode opcode, String username, Writer out)
+	public static boolean sendCommandPrologue(RequestPrologue prologue, Writer out)
 	{
 		try
 		{
 			// start with opcode
-			out.write(opcode.serialise());
+			out.write(prologue.getOpcode().serialise());
 			out.write(DELIMITER);
 
 			// followed by username
-			out.write(username);
+			out.write(prologue.getUsername());
 			out.write(DELIMITER);
 
 			out.flush();
@@ -50,10 +52,62 @@ public class Protocol
 			// followed by any opcode specific arguments
 		} catch (IOException e)
 		{
-			Logger.error("Failed to send %s command: %s", opcode, e.getMessage());
+			Logger.error("Failed to send %s request: %s", prologue.getOpcode(), e.getMessage());
 			return false;
 		}
 
 		return true;
+	}
+
+	public static RequestPrologue readCommandPrologue(BufferedReader reader, Opcode... expectedOpcodes)
+	{
+		try
+		{
+			// read opcode
+			String opcodeStr = reader.readLine();
+			if (opcodeStr == null)
+				throw new IllegalArgumentException("Read error");
+
+			// parse opcode
+			Opcode opcode = Opcode.parse(opcodeStr);
+			if (opcode == null)
+				throw new IllegalArgumentException("Invalid opcode '" + opcodeStr + "'");
+
+			// validate opcode
+			if (expectedOpcodes != null && !Arrays.asList(expectedOpcodes).contains(opcode))
+				throw new IllegalArgumentException("Unexpected opcode " + opcode);
+
+			// read username
+			String username = reader.readLine();
+
+			return new RequestPrologue(opcode, username);
+
+		} catch (IOException | IllegalArgumentException e)
+		{
+			Logger.error(e.getMessage());
+			return null;
+		}
+	}
+
+	public static class RequestPrologue
+	{
+		private final Opcode opcode;
+		private final String username;
+
+		public RequestPrologue(Opcode opcode, String username)
+		{
+			this.opcode = opcode;
+			this.username = username;
+		}
+
+		public Opcode getOpcode()
+		{
+			return opcode;
+		}
+
+		public String getUsername()
+		{
+			return username;
+		}
 	}
 }

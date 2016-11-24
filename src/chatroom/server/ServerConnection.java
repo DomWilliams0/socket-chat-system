@@ -39,10 +39,9 @@ public class ServerConnection
 			BufferedWriter out = client.getOut();
 
 			// send message command
-			if (!Protocol.sendCommandPrologue(Protocol.Opcode.SEND, message.getFrom(), out))
-			{
+			Protocol.RequestPrologue prologue = new Protocol.RequestPrologue(Protocol.Opcode.SEND, message.getFrom());
+			if (!Protocol.sendCommandPrologue(prologue, out))
 				return;
-			}
 
 			// send actual message
 			out.write(message.getContent());
@@ -63,19 +62,13 @@ public class ServerConnection
 		BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
 
-		// read opcode
-		String opcodeStr = in.readLine();
-		if (!opcodeStr.equals(Protocol.Opcode.JOIN.serialise()))
-		{
-			Logger.error("Expected join opcode in main thread, received '%s' instead", opcodeStr);
+		Protocol.RequestPrologue prologue = Protocol.readCommandPrologue(in, Protocol.Opcode.JOIN);
+		if (prologue == null)
 			return false;
-		}
 
-		// read username
-		String username = in.readLine();
-		Logger.log("User '%s' connected from %s", username, getClientAddress(client));
+		Logger.log("User '%s' connected from %s", prologue.getUsername(), getClientAddress(client));
 
-		return handleJoin(username, in, out);
+		return handleJoin(prologue.getUsername(), in, out);
 	}
 
 	/**
