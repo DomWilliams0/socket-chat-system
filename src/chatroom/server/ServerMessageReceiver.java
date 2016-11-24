@@ -4,9 +4,11 @@ import chatroom.shared.ChatException;
 import chatroom.shared.Logger;
 import chatroom.shared.protocol.Command;
 import chatroom.shared.protocol.Opcode;
+import chatroom.shared.protocol.Protocol;
 import chatroom.shared.protocol.RequestPrologue;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 
 public class ServerMessageReceiver implements Runnable
 {
@@ -28,11 +30,13 @@ public class ServerMessageReceiver implements Runnable
 			// TODO needs to be interrupted
 
 			BufferedReader in = clientInstance.getIn();
+			BufferedWriter out = clientInstance.getOut();
 			String username = clientInstance.getUsername();
 
 			try
 			{
-				RequestPrologue request = Command.readPrologue(in, Opcode.QUIT, Opcode.SEND);
+				RequestPrologue request = Command.readPrologue(in,
+					Opcode.QUIT, Opcode.SEND, Opcode.LIST);
 
 				// validate sender
 				if (!username.equals(request.getUsername()))
@@ -52,6 +56,12 @@ public class ServerMessageReceiver implements Runnable
 					case SEND:
 						// read message and send to all clients
 						serverInstance.broadcastEncodedMessage(username, Command.readArgument(in));
+						break;
+
+					case LIST:
+						int userCount = serverInstance.getUserCount();
+						Command.sendArgument(Integer.toString(userCount), out);
+						Command.sendArgument(serverInstance.getUserList(Protocol.DELIMITER), out);
 						break;
 				}
 			} catch (ChatException e)

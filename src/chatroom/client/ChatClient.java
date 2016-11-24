@@ -57,9 +57,15 @@ public class ChatClient
 
 			Logger.log("Successfully connected");
 
-			// join
-			success = sendJoin();
+			// send join command
+			sendJoin();
 
+			// request user list
+			sendList();
+
+			// TODO request history
+
+			success = true;
 		} catch (IOException e)
 		{
 			Logger.error("Could not connect to server: %s", e.getMessage());
@@ -105,7 +111,7 @@ public class ChatClient
 		// no ack needed for now
 	}
 
-	private boolean sendJoin() throws ChatException
+	private void sendJoin() throws ChatException
 	{
 		CommandClientJoin command = new CommandClientJoin(username);
 		command.send(out);
@@ -114,14 +120,21 @@ public class ChatClient
 		if (ack != null)
 		{
 			display("Error while connecting: %s", ack);
-			return false;
+			return;
 		}
 
 		// read banner
 		String banner = command.read(in);
 		display("The server says: %s", banner);
+	}
 
-		return true;
+	private void sendList() throws ChatException
+	{
+		CommandClientList command = new CommandClientList(username);
+		command.send(out);
+
+		String list = command.read(in);
+		display(list);
 	}
 
 	/**

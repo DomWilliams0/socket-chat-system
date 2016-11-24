@@ -93,4 +93,18 @@ public class ChatServer
 			ServerConnection.broadcastMessage(client, m);
 		}
 	}
+
+	public int getUserCount()
+	{
+		return clients.size();
+	}
+
+	public String getUserList(String delimiter)
+	{
+		StringBuilder sb = new StringBuilder(100);
+
+		clients.keySet().forEach(name -> sb.append(name).append(delimiter));
+
+		return sb.toString().trim();
+	}
 }
