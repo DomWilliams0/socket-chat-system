@@ -19,7 +19,7 @@ public abstract class Command
 		this.username = username;
 	}
 
-	public static void sendArgument(String arg, BufferedWriter out) throws ChatException
+	protected static void sendArgument(BufferedWriter out, String arg) throws ChatException
 	{
 		try
 		{
@@ -32,7 +32,7 @@ public abstract class Command
 		}
 	}
 
-	public static String readArgument(BufferedReader in) throws ChatException
+	protected static String readArgument(BufferedReader in) throws ChatException
 	{
 		try
 		{
@@ -86,10 +86,10 @@ public abstract class Command
 	protected void sendPrologue(BufferedWriter out) throws ChatException
 	{
 		// start with opcode
-		sendArgument(opcode.serialise(), out);
+		sendArgument(out, opcode.serialise());
 
 		// followed by username
-		sendArgument(username, out);
+		sendArgument(out, username);
 
 		// followed by any opcode specific arguments
 	}

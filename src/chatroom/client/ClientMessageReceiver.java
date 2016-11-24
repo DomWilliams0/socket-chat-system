@@ -3,6 +3,7 @@ package chatroom.client;
 import chatroom.server.Message;
 import chatroom.shared.ChatException;
 import chatroom.shared.protocol.Command;
+import chatroom.shared.protocol.CommandSend;
 import chatroom.shared.protocol.Opcode;
 import chatroom.shared.protocol.RequestPrologue;
 
@@ -31,7 +32,7 @@ class ClientMessageReceiver implements Runnable
 			{
 				RequestPrologue request = Command.readPrologue(in, Opcode.SEND);
 
-				String encodedMessage = Command.readArgument(in);
+				String encodedMessage = CommandSend.readMessageContent(in);
 				Message m = new Message(request.getUsername(), encodedMessage);
 				m.decode();
 

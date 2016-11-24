@@ -18,12 +18,12 @@ public class ServerConnection
 		this.server = server;
 	}
 
-	static void broadcastMessage(ClientInstance client, Message message)
+	static void sendMessageToClient(ClientInstance client, Message message)
 	{
 		try
 		{
 
-			CommandServerSend command = new CommandServerSend(message.getFrom(), message.getContent());
+			CommandSend command = new CommandSend(message);
 			command.send(client.getOut());
 
 		} catch (ChatException e)
@@ -86,7 +86,7 @@ public class ServerConnection
 			return;
 
 		// send banner
-		Command.sendArgument(server.getBanner(), out);
+		CommandJoin.sendBanner(out, server.getBanner());
 	}
 
 	private boolean acceptClient()

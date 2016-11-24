@@ -34,8 +34,8 @@ public class CommandAck extends Command
 	@Override
 	public void send(BufferedWriter out) throws ChatException
 	{
-		sendArgument(opcode.serialise(), out);
+		sendArgument(out, opcode.serialise());
 		if (opcode == Opcode.ERRO)
-			sendArgument(error, out);
+			sendArgument(out, error);
 	}
 }

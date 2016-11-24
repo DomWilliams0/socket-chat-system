@@ -85,7 +85,7 @@ public class ChatClient
 		try
 		{
 			Logger.log("Disconnecting");
-			CommandClientQuit command = new CommandClientQuit(username);
+			CommandQuit command = new CommandQuit(username);
 			command.send(out);
 
 			out = null;
@@ -99,7 +99,10 @@ public class ChatClient
 
 	public void sendMessage(String message)
 	{
-		CommandClientSend command = new CommandClientSend(username, message);
+		Message m = new Message(username, message);
+		m.encode();
+
+		CommandSend command = new CommandSend(m);
 		try
 		{
 			command.send(out);
@@ -113,7 +116,7 @@ public class ChatClient
 
 	private void sendJoin() throws ChatException
 	{
-		CommandClientJoin command = new CommandClientJoin(username);
+		CommandJoin command = new CommandJoin(username);
 		command.send(out);
 
 		String ack = CommandAck.readAck(in);
@@ -130,7 +133,7 @@ public class ChatClient
 
 	private void sendList() throws ChatException
 	{
-		CommandClientList command = new CommandClientList(username);
+		CommandList command = new CommandList(username);
 		command.send(out);
 
 		String list = command.read(in);

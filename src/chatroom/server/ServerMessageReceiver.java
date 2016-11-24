@@ -2,10 +2,7 @@ package chatroom.server;
 
 import chatroom.shared.ChatException;
 import chatroom.shared.Logger;
-import chatroom.shared.protocol.Command;
-import chatroom.shared.protocol.Opcode;
-import chatroom.shared.protocol.Protocol;
-import chatroom.shared.protocol.RequestPrologue;
+import chatroom.shared.protocol.*;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -55,13 +52,13 @@ public class ServerMessageReceiver implements Runnable
 
 					case SEND:
 						// read message and send to all clients
-						serverInstance.broadcastEncodedMessage(username, Command.readArgument(in));
+						Message m = CommandSend.readMessageFromClient(in, username);
+//						serverInstance.broadcastEncodedMessage(username, Command.readArgument(in));
+						serverInstance.broadcastMessage(m);
 						break;
 
 					case LIST:
-						int userCount = serverInstance.getUserCount();
-						Command.sendArgument(Integer.toString(userCount), out);
-						Command.sendArgument(serverInstance.getUserList(Protocol.DELIMITER), out);
+						CommandList.sendUserList(out, serverInstance);
 						break;
 				}
 			} catch (ChatException e)

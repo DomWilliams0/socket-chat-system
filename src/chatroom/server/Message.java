@@ -30,5 +30,17 @@ public class Message
 		content = Protocol.decodeMessage(content);
 	}
 
+	public void encode()
+	{
+		content = Protocol.encodeMessage(content);
+	}
 
+	@Override
+	public String toString()
+	{
+		return "Message{" +
+			"from='" + from + '\'' +
+			", content='" + content + '\'' +
+			'}';
+	}
 }

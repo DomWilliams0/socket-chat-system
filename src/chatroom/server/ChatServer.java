@@ -82,16 +82,16 @@ public class ChatServer
 
 	public void broadcastServerMessage(String message)
 	{
-		broadcastEncodedMessage(Protocol.SERVER_USERNAME, Protocol.encodeMessage(message));
+		Message m = new Message(Protocol.SERVER_USERNAME, message);
+		m.encode();
+
+		broadcastMessage(m);
 	}
 
-	public void broadcastEncodedMessage(String username, String message)
+	public void broadcastMessage(Message message)
 	{
-		Message m = new Message(username, message);
 		for (ClientInstance client : clients.values())
-		{
-			ServerConnection.broadcastMessage(client, m);
-		}
+			ServerConnection.sendMessageToClient(client, message);
 	}
 
 	public int getUserCount()

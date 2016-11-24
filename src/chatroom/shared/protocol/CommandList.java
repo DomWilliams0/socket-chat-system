@@ -1,12 +1,15 @@
 package chatroom.shared.protocol;
 
+import chatroom.server.ChatServer;
 import chatroom.shared.ChatException;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.util.Collection;
 
-public class CommandClientList extends Command
+public class CommandList extends Command
 {
-	public CommandClientList(String username)
+	public CommandList(String username)
 	{
 		super(Opcode.LIST, username);
 	}
@@ -30,5 +33,11 @@ public class CommandClientList extends Command
 		}
 
 		return sb.toString();
+	}
+
+	public static void sendUserList(BufferedWriter out, ChatServer server) throws ChatException
+	{
+		sendArgument(out, Integer.toString(server.getUserCount()));
+		sendArgument(out, server.getUserList(Protocol.DELIMITER));
 	}
 }
