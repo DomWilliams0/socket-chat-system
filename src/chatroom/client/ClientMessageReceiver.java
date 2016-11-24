@@ -1,11 +1,12 @@
 package chatroom.client;
 
-import chatroom.shared.Logger;
-import chatroom.shared.Protocol;
 import chatroom.server.Message;
+import chatroom.shared.ChatException;
+import chatroom.shared.protocol.Command;
+import chatroom.shared.protocol.Opcode;
+import chatroom.shared.protocol.RequestPrologue;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 
 class ClientMessageReceiver implements Runnable
 {
@@ -26,27 +27,22 @@ class ClientMessageReceiver implements Runnable
 
 			BufferedReader in = client.getIn();
 
-			// read prologue
-			Protocol.RequestPrologue request = Protocol.readCommandPrologue(in, Protocol.Opcode.SEND);
-			if (request == null)
-				return;
-
-			// read message
 			try
 			{
-				String encodedMessage = in.readLine();
+				RequestPrologue request = Command.readPrologue(in, Opcode.SEND);
 
+				String encodedMessage = Command.readArgument(in);
 				Message m = new Message(request.getUsername(), encodedMessage);
 				m.decode();
 
 				client.onReceiveMessage(m);
-
-			} catch (IOException e)
+			} catch (ChatException e)
 			{
-				Logger.error(e.getMessage());
-				return;
-			}
+				e.printStackTrace();
 
+				if (e.isSerious())
+					break;
+			}
 		}
 
 	}

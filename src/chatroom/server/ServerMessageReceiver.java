@@ -1,10 +1,12 @@
 package chatroom.server;
 
+import chatroom.shared.ChatException;
 import chatroom.shared.Logger;
-import chatroom.shared.Protocol;
+import chatroom.shared.protocol.Command;
+import chatroom.shared.protocol.Opcode;
+import chatroom.shared.protocol.RequestPrologue;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 
 public class ServerMessageReceiver implements Runnable
 {
@@ -28,37 +30,35 @@ public class ServerMessageReceiver implements Runnable
 			BufferedReader in = clientInstance.getIn();
 			String username = clientInstance.getUsername();
 
-			Protocol.RequestPrologue request = Protocol.readCommandPrologue(in, Protocol.Opcode.QUIT, Protocol.Opcode.SEND);
-			if (request == null)
-				return;
-
-			// validate sender
-			if (!username.equals(request.getUsername()))
+			try
 			{
-				Logger.error("User '%s' tried sending a command as '%s', uh oh", username, request.getUsername());
-				continue;
-			}
+				RequestPrologue request = Command.readPrologue(in, Opcode.QUIT, Opcode.SEND);
 
-			// handle opcode
-			switch (request.getOpcode())
-			{
-				case QUIT:
-					// delegate quit message
-					serverInstance.removeClient(username);
-					break;
+				// validate sender
+				if (!username.equals(request.getUsername()))
+				{
+					Logger.error("User '%s' tried sending a command as '%s', uh oh", username, request.getUsername());
+					continue;
+				}
 
-				case SEND:
-					try
-					{
+				// handle opcode
+				switch (request.getOpcode())
+				{
+					case QUIT:
+						// delegate quit message
+						serverInstance.removeClient(username);
+						break;
+
+					case SEND:
 						// read message and send to all clients
-						String encoded = in.readLine();
-						serverInstance.broadcastEncodedMessage(username, encoded);
+						serverInstance.broadcastEncodedMessage(username, Command.readArgument(in));
+						break;
+				}
+			} catch (ChatException e)
+			{
+				e.printStackTrace();
 
-					} catch (IOException e)
-					{
-						Logger.error(e.getMessage());
-						return;
-					}
+				if (e.isSerious())
 					break;
 			}
 

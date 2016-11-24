@@ -1,8 +1,9 @@
 package chatroom.client;
 
-import chatroom.shared.Logger;
-import chatroom.shared.Protocol;
 import chatroom.server.Message;
+import chatroom.shared.ChatException;
+import chatroom.shared.Logger;
+import chatroom.shared.protocol.*;
 
 import java.io.*;
 import java.net.Socket;
@@ -11,9 +12,6 @@ import java.util.Scanner;
 public class ChatClient
 {
 	private final String username;
-
-	private Socket socket;
-	private boolean connected;
 
 	private BufferedReader in;
 	private BufferedWriter out;
@@ -24,13 +22,18 @@ public class ChatClient
 	public ChatClient(String username)
 	{
 		this.username = username;
-		this.connected = false;
 
 		if (username == null ||
 			username.length() < 3 ||
 			username.contains(Protocol.DELIMITER) ||
 			username.equals(Protocol.SERVER_USERNAME))
 			throw new IllegalArgumentException("Invalid username");
+	}
+
+	public static boolean runClient(String address, int port, String username)
+	{
+		ChatClient client = new ChatClient(username);
+		return client.start(address, port);
 	}
 
 	/**
@@ -42,17 +45,16 @@ public class ChatClient
 	 */
 	public boolean connect(String address, int port)
 	{
-		boolean success;
+		boolean success = false;
 		try
 		{
 			String addrStr = address + ":" + port;
 
 			Logger.log(String.format("Attempting to connect to %s...", addrStr));
-			socket = new Socket(address, port);
+			Socket socket = new Socket(address, port);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
-			connected = true;
 			Logger.log("Successfully connected");
 
 			// join
@@ -61,35 +63,41 @@ public class ChatClient
 		} catch (IOException e)
 		{
 			Logger.error("Could not connect to server: %s", e.getMessage());
-			success = false;
+		} catch (ChatException e)
+		{
+			e.printStackTrace();
 		}
 
 		return success;
 	}
 
-
 	public void disconnect()
 	{
-		if (connected)
+		if (out == null && in == null)
+			return;
+
+		try
 		{
 			Logger.log("Disconnecting");
-			sendCommandPrologue(Protocol.Opcode.QUIT);
-			connected = false;
+			CommandClientQuit command = new CommandClientQuit(username);
+			command.send(out);
+
+			out = null;
+			in = null;
+
+		} catch (ChatException e)
+		{
+			e.printStackTrace();
 		}
 	}
 
 	public void sendMessage(String message)
 	{
-		sendCommandPrologue(Protocol.Opcode.SEND);
-
-		String encoded = Protocol.encodeMessage(message);
-
+		CommandClientSend command = new CommandClientSend(username, message);
 		try
 		{
-			out.write(encoded);
-			out.write("\n");
-			out.flush();
-		} catch (IOException e)
+			command.send(out);
+		} catch (ChatException e)
 		{
 			e.printStackTrace();
 		}
@@ -97,53 +105,12 @@ public class ChatClient
 		// no ack needed for now
 	}
 
-	private boolean sendCommandPrologue(Protocol.Opcode opcode)
+	private boolean sendJoin() throws ChatException
 	{
-		ensureConnected();
-		Protocol.RequestPrologue prologue = new Protocol.RequestPrologue(opcode, username);
-		return Protocol.sendCommandPrologue(prologue, out);
-	}
+		CommandClientJoin command = new CommandClientJoin(username);
+		command.send(out);
 
-	private String readAck()
-	{
-		try
-		{
-			ensureConnected();
-
-			String opcodeStr = in.readLine();
-			Protocol.Opcode opcode = Protocol.Opcode.parse(opcodeStr);
-
-			// success, phew
-			if (opcode == Protocol.Opcode.SUCC)
-			{
-				return null;
-			}
-
-			// error, oh dear
-			if (opcode == Protocol.Opcode.ERRO)
-			{
-				return in.readLine();
-			}
-
-			// something else
-			return "Invalid ack opcode '" + opcodeStr + "'";
-
-
-		} catch (IOException e)
-		{
-			return "Failed to read ack: " + e.getMessage();
-		}
-	}
-
-	private boolean sendJoin() throws IOException
-	{
-		// send join command
-		sendCommandPrologue(Protocol.Opcode.JOIN);
-
-		// read ack
-		String ack = readAck();
-
-		// error
+		String ack = CommandAck.readAck(in);
 		if (ack != null)
 		{
 			display("Error while connecting: %s", ack);
@@ -151,19 +118,10 @@ public class ChatClient
 		}
 
 		// read banner
-		String banner = in.readLine();
+		String banner = command.read(in);
 		display("The server says: %s", banner);
 
 		return true;
-	}
-
-	/**
-	 * Throws an IllegalStateException if the client is not connected to a server
-	 */
-	private void ensureConnected()
-	{
-		if (!connected)
-			throw new IllegalStateException("Client is not connected to a server");
 	}
 
 	/**
@@ -172,14 +130,6 @@ public class ChatClient
 	public String getUsername()
 	{
 		return username;
-	}
-
-	/**
-	 * @return If the client is connected to a server
-	 */
-	public boolean isConnected()
-	{
-		return connected;
 	}
 
 	/**
@@ -252,11 +202,5 @@ public class ChatClient
 	public void onReceiveMessage(Message m)
 	{
 		display("[%s]: %s", m.getFrom(), m.getContent());
-	}
-
-	public static boolean runClient(String address, int port, String username)
-	{
-		ChatClient client = new ChatClient(username);
-		return client.start(address, port);
 	}
 }

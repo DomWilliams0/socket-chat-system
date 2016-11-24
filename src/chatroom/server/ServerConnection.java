@@ -2,7 +2,7 @@ package chatroom.server;
 
 import chatroom.shared.ChatException;
 import chatroom.shared.Logger;
-import chatroom.shared.Protocol;
+import chatroom.shared.protocol.*;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -16,6 +16,20 @@ public class ServerConnection
 	public ServerConnection(ChatServer server)
 	{
 		this.server = server;
+	}
+
+	static void broadcastMessage(ClientInstance client, Message message)
+	{
+		try
+		{
+
+			CommandServerSend command = new CommandServerSend(message.getFrom(), message.getContent());
+			command.send(client.getOut());
+
+		} catch (ChatException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	public boolean bind(int port)
@@ -32,110 +46,66 @@ public class ServerConnection
 		}
 	}
 
-	static void broadcastMessage(ClientInstance client, Message message)
+	private void handleConnection(Socket client) throws ChatException
 	{
 		try
 		{
-			BufferedWriter out = client.getOut();
 
-			// send message command
-			Protocol.RequestPrologue prologue = new Protocol.RequestPrologue(Protocol.Opcode.SEND, message.getFrom());
-			if (!Protocol.sendCommandPrologue(prologue, out))
-				return;
+			BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
 
-			// send actual message
-			out.write(message.getContent());
-			out.write(Protocol.DELIMITER);
-			out.flush();
+			RequestPrologue prologue = Command.readPrologue(in, Opcode.JOIN);
+			Logger.log("User '%s' connected from %s", prologue.getUsername(), getClientAddress(client));
+
+			handleJoin(prologue.getUsername(), in, out);
 
 		} catch (IOException e)
 		{
-			e.printStackTrace();
+			throw new ChatException(e);
 		}
 	}
 
-	/**
-	 * @return True if the handshake was successful, and the socket should be kept open
-	 */
-	private boolean handleConnection(Socket client) throws IOException
+	private void handleJoin(String username, BufferedReader in, BufferedWriter out) throws ChatException
 	{
-		BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
+		ChatException error = null;
 
-		Protocol.RequestPrologue prologue = Protocol.readCommandPrologue(in, Protocol.Opcode.JOIN);
-		if (prologue == null)
-			return false;
-
-		Logger.log("User '%s' connected from %s", prologue.getUsername(), getClientAddress(client));
-
-		return handleJoin(prologue.getUsername(), in, out);
-	}
-
-	/**
-	 * @return True if the handshake was successful, and the socket should be kept open
-	 */
-	private boolean handleJoin(String username, BufferedReader in, BufferedWriter out) throws IOException
-	{
-		String error = null;
-
-		// send ack
+		// acknowledge
 		try
 		{
 			server.addClient(username, in, out);
 		} catch (ChatException e)
 		{
-			error = e.getMessage();
+			error = e;
 		}
 
-		sendResponse(error, out);
+		CommandAck ack = new CommandAck(error);
+		ack.send(out);
 
 		// error; abort
 		if (error != null)
-		{
-			return false;
-		}
+			return;
 
 		// send banner
-		out.write(server.getBanner() + Protocol.DELIMITER);
-		out.flush();
-		return true;
+		Command.sendArgument(server.getBanner(), out);
 	}
-
-	private void sendResponse(String error, BufferedWriter out) throws IOException
-	{
-		// success
-		if (error == null)
-		{
-			out.write(Protocol.Opcode.SUCC.serialise());
-			out.write(Protocol.DELIMITER);
-		}
-
-		// error
-		else
-		{
-			out.write(Protocol.Opcode.ERRO.serialise());
-			out.write(Protocol.DELIMITER);
-
-			out.write(error);
-			out.write(Protocol.DELIMITER);
-		}
-
-		out.flush();
-	}
-
 
 	private boolean acceptClient()
 	{
 		Socket client = null;
-		boolean maintainConnection = false;
+		boolean maintainConnection = true;
 
 		try
 		{
 			client = socket.accept();
-			maintainConnection = handleConnection(client);
+			handleConnection(client);
 		} catch (IOException e)
 		{
 			Logger.error("Failed to handle client: %s", e.getMessage());
+			return false;
+		} catch (ChatException e)
+		{
+			e.printStackTrace();
+			maintainConnection = false;
 		}
 
 		if (!maintainConnection)

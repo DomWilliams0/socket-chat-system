@@ -1,4 +1,6 @@
-package chatroom.shared;
+package chatroom.shared.protocol;
+
+import chatroom.shared.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,35 +10,10 @@ import java.util.Base64;
 
 public class Protocol
 {
-	public enum Opcode
-	{
-		JOIN,
-		SEND,
-		QUIT,
-
-		SUCC, // success
-		ERRO; // error + message
-
-		public String serialise()
-		{
-			return this.toString();
-		}
-
-		public static Opcode parse(String s)
-		{
-			try
-			{
-				return Opcode.valueOf(s);
-			} catch (IllegalArgumentException e)
-			{
-				return null;
-			}
-		}
-	}
-
 	public static final String DELIMITER = "\n";
 	public static final String SERVER_USERNAME = "SERVER";
 
+	@Deprecated
 	public static boolean sendCommandPrologue(RequestPrologue prologue, Writer out)
 	{
 		try
@@ -61,6 +38,7 @@ public class Protocol
 		return true;
 	}
 
+	@Deprecated
 	public static RequestPrologue readCommandPrologue(BufferedReader reader, Opcode... expectedOpcodes)
 	{
 		try
@@ -108,25 +86,4 @@ public class Protocol
 		}
 	}
 
-	public static class RequestPrologue
-	{
-		private final Opcode opcode;
-		private final String username;
-
-		public RequestPrologue(Opcode opcode, String username)
-		{
-			this.opcode = opcode;
-			this.username = username;
-		}
-
-		public Opcode getOpcode()
-		{
-			return opcode;
-		}
-
-		public String getUsername()
-		{
-			return username;
-		}
-	}
 }

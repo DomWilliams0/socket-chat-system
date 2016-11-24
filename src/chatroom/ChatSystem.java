@@ -8,18 +8,39 @@ import java.util.Arrays;
 
 public class ChatSystem
 {
-	private enum ChatType
-	{
-		SERVER, CLIENT
-	}
-
 	private ChatType type;
 	private int port;
 	private String address;
-
 	private String username;
-
 	private String serverBanner;
+
+	public static void main(String[] args)
+	{
+		ChatSystem system = new ChatSystem();
+
+		try
+		{
+			system.parseArgs(args);
+		} catch (RuntimeException e)
+		{
+			Logger.error(e.getMessage());
+			System.exit(1);
+			return;
+		}
+
+		boolean success = false;
+		switch (system.getType())
+		{
+			case SERVER:
+				success = ChatServer.runServer(system.getPort(), system.getServerBanner());
+				break;
+			case CLIENT:
+				success = ChatClient.runClient(system.getAddress(), system.getPort(), system.getUsername());
+				break;
+		}
+
+		System.exit(success ? 0 : 2);
+	}
 
 	private void parseArgs(String[] args) throws IllegalArgumentException
 	{
@@ -91,31 +112,8 @@ public class ChatSystem
 		return serverBanner;
 	}
 
-	public static void main(String[] args)
+	private enum ChatType
 	{
-		ChatSystem system = new ChatSystem();
-
-		try
-		{
-			system.parseArgs(args);
-		} catch (RuntimeException e)
-		{
-			Logger.error(e.getMessage());
-			System.exit(1);
-			return;
-		}
-
-		boolean success = false;
-		switch (system.getType())
-		{
-			case SERVER:
-				success = ChatServer.runServer(system.getPort(), system.getServerBanner());
-				break;
-			case CLIENT:
-				success = ChatClient.runClient(system.getAddress(), system.getPort(), system.getUsername());
-				break;
-		}
-
-		System.exit(success ? 0 : 2);
+		SERVER, CLIENT
 	}
 }

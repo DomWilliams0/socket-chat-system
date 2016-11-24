@@ -2,7 +2,7 @@ package chatroom.server;
 
 import chatroom.shared.ChatException;
 import chatroom.shared.Logger;
-import chatroom.shared.Protocol;
+import chatroom.shared.protocol.Protocol;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -24,6 +24,14 @@ public class ChatServer
 
 		this.banner = banner;
 		this.clients = new HashMap<>();
+	}
+
+	public static boolean runServer(int port, String banner)
+	{
+		ChatServer server = new ChatServer(banner);
+		ServerConnection serverConnection = new ServerConnection(server);
+
+		return serverConnection.startListening(port);
 	}
 
 	public String getBanner()
@@ -84,13 +92,5 @@ public class ChatServer
 		{
 			ServerConnection.broadcastMessage(client, m);
 		}
-	}
-
-	public static boolean runServer(int port, String banner)
-	{
-		ChatServer server = new ChatServer(banner);
-		ServerConnection serverConnection = new ServerConnection(server);
-
-		return serverConnection.startListening(port);
 	}
 }
