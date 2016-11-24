@@ -2,6 +2,7 @@ package chatroom;
 
 import chatroom.client.ChatClient;
 import chatroom.server.ChatServer;
+import chatroom.shared.Logger;
 
 import java.util.Arrays;
 

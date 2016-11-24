@@ -1,7 +1,7 @@
 package chatroom.client;
 
-import chatroom.Logger;
-import chatroom.Protocol;
+import chatroom.shared.Logger;
+import chatroom.shared.Protocol;
 import chatroom.server.Message;
 
 import java.io.*;

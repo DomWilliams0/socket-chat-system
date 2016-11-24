@@ -1,7 +1,7 @@
 package chatroom.server;
 
-import chatroom.Logger;
-import chatroom.Protocol;
+import chatroom.shared.Logger;
+import chatroom.shared.Protocol;
 
 import java.io.BufferedReader;
 import java.io.IOException;

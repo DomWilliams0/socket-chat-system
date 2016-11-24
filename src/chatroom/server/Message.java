@@ -1,6 +1,6 @@
 package chatroom.server;
 
-import chatroom.Protocol;
+import chatroom.shared.Protocol;
 
 public class Message
 {

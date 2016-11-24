@@ -1,8 +1,8 @@
 package chatroom.server;
 
-import chatroom.ChatException;
-import chatroom.Logger;
-import chatroom.Protocol;
+import chatroom.shared.ChatException;
+import chatroom.shared.Logger;
+import chatroom.shared.Protocol;
 
 import java.io.*;
 import java.net.ServerSocket;

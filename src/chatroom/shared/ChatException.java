@@ -1,4 +1,4 @@
-package chatroom;
+package chatroom.shared;
 
 public class ChatException extends Exception
 {
