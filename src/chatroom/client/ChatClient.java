@@ -26,7 +26,11 @@ public class ChatClient
 		this.username = username;
 		this.connected = false;
 
-		// TODO verify username is not null, is minimum length, has no new lines in it etc.
+		if (username == null ||
+			username.length() < 3 ||
+			username.contains(Protocol.DELIMITER) ||
+			username.equals(Protocol.SERVER_USERNAME))
+			throw new IllegalArgumentException("Invalid username");
 	}
 
 	/**
