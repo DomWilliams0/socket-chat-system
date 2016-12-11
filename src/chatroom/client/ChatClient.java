@@ -1,20 +1,24 @@
 package chatroom.client;
 
+import chatroom.client.ui.ConsoleInterface;
+import chatroom.client.ui.GraphicalInterface;
+import chatroom.client.ui.IInterface;
 import chatroom.shared.protocol.Protocol;
-
-import java.util.Scanner;
 
 public class ChatClient
 {
 	private final String username;
 	private final ClientConnection connection;
+	private final IInterface ui;
 
 	/**
 	 * @param username The client's username to use in the chatroom
+	 * @param ui       The user interface to use
 	 */
-	public ChatClient(String username)
+	public ChatClient(String username, IInterface ui)
 	{
 		this.username = username;
+		this.ui = ui;
 
 		if (username == null ||
 			username.length() < 3 ||
@@ -25,12 +29,38 @@ public class ChatClient
 		this.connection = new ClientConnection(this);
 	}
 
-	/**
-	 * Displays the given message on the UI
-	 */
-	public void display(String message, Object... format)
+	public static void main(String[] args)
 	{
-		System.out.printf(message + "\n", format);
+		if (args.length != 4)
+			throw new IllegalArgumentException("Usage: <username> <gui | console> <address> <port>");
+
+		String username = args[0];
+		String uiChoice = args[1];
+		String address = args[2];
+		Integer port = Integer.parseInt(args[3]);
+
+		IInterface ui;
+		switch (uiChoice)
+		{
+			case "gui":
+				ui = new GraphicalInterface();
+				break;
+			case "console":
+				ui = new ConsoleInterface(System.out);
+				break;
+			default:
+				throw new IllegalArgumentException("UI choice can be either \"gui\" or \"console\"");
+		}
+
+		ChatClient client = new ChatClient(username, ui);
+		boolean success = client.start(address, port);
+
+		System.exit(success ? 0 : 1);
+	}
+
+	public String getUsername()
+	{
+		return username;
 	}
 
 	public boolean start(String address, int port)
@@ -41,27 +71,8 @@ public class ChatClient
 			return false;
 		}
 
-		// TODO UI interface
-		display("Type /quit to exit");
-		Scanner scanner = new Scanner(System.in);
-		String line;
-		while ((line = scanner.nextLine()) != null)
-		{
-			// quit
-			if (line.equals("/quit"))
-			{
-				break;
-			}
-
-			// empty
-			if (line.isEmpty())
-			{
-				continue;
-			}
-
-			// send message
-			connection.sendMessage(line);
-		}
+		// run UI
+		ui.start(connection);
 
 		// disconnect
 		connection.disconnect();
@@ -69,24 +80,9 @@ public class ChatClient
 		return true;
 	}
 
-	public String getUsername()
+	public IInterface getUI()
 	{
-		return username;
-	}
-
-	public static void main(String[] args)
-	{
-		if (args.length != 3)
-			throw new IllegalArgumentException("Usage: <username> <address> <port>");
-
-		String username = args[0];
-		String address = args[1];
-		Integer port = Integer.parseInt(args[2]);
-
-		ChatClient client = new ChatClient(username);
-		boolean success = client.start(address, port);
-
-		System.exit(success ? 0 : 1);
+		return ui;
 	}
 
 }

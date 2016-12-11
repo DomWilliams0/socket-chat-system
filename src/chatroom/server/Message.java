@@ -37,6 +37,11 @@ public class Message implements Serializable
 		content = Protocol.encodeMessage(content);
 	}
 
+	public String format()
+	{
+		return String.format("[%s] %s\n", from, content);
+	}
+
 	@Override
 	public String toString()
 	{

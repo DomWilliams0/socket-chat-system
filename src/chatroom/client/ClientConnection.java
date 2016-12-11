@@ -116,13 +116,13 @@ public class ClientConnection
 		String ack = CommandAck.readAck(in);
 		if (ack != null)
 		{
-			client.display("Error while connecting: %s", ack);
+			client.getUI().display(String.format("Error while connecting: %s", ack));
 			return;
 		}
 
 		// read banner
 		String banner = command.read(in);
-		client.display("The server says: %s", banner);
+		client.getUI().display(String.format("The server says: %s", banner));
 	}
 
 	private void sendList() throws ChatException
@@ -131,7 +131,7 @@ public class ClientConnection
 		command.send(out);
 
 		String list = command.read(in);
-		client.display(list);
+		client.getUI().display(list);
 	}
 
 	private void sendHistory() throws ChatException
@@ -152,7 +152,7 @@ public class ClientConnection
 
 	private void onReceiveMessage(Message m)
 	{
-		client.display("[%s]: %s", m.getFrom(), m.getContent());
+		client.getUI().displayMessage(m);
 	}
 
 
