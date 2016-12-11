@@ -10,7 +10,7 @@ class ClientInstance
 	private final BufferedWriter out;
 	private final Thread thread;
 
-	ClientInstance(String username, BufferedReader in, BufferedWriter out, ChatServer serverInstance)
+	ClientInstance(String username, BufferedReader in, BufferedWriter out, ServerState serverInstance)
 	{
 		this.username = username;
 		this.in = in;

@@ -13,9 +13,9 @@ import java.net.Socket;
 public class ServerConnection
 {
 	private ServerSocket socket;
-	private ChatServer server;
+	private ServerState server;
 
-	public ServerConnection(ChatServer server)
+	public ServerConnection(ServerState server)
 	{
 		this.server = server;
 	}

@@ -11,12 +11,12 @@ import java.io.BufferedWriter;
 public class ServerMessageReceiver implements Runnable
 {
 	private final ClientInstance clientInstance;
-	private final ChatServer serverInstance;
+	private final ServerState server;
 
-	public ServerMessageReceiver(ClientInstance clientInstance, ChatServer serverInstance)
+	public ServerMessageReceiver(ClientInstance clientInstance, ServerState server)
 	{
 		this.clientInstance = clientInstance;
-		this.serverInstance = serverInstance;
+		this.server = server;
 	}
 
 	@Override
@@ -48,21 +48,21 @@ public class ServerMessageReceiver implements Runnable
 				{
 					case QUIT:
 						// delegate quit message
-						serverInstance.removeClient(username);
+						server.removeClient(username);
 						break;
 
 					case SEND:
 						// read message and send to all clients
 						Message m = CommandSend.readMessageFromClient(in, username);
-						serverInstance.broadcastMessage(m);
+						server.broadcastMessage(m);
 						break;
 
 					case LIST:
-						CommandList.sendUserList(out, serverInstance);
+						CommandList.sendUserList(out, server);
 						break;
 
 					case HIST:
-						CommandClientHistory.sendChatHistory(out, serverInstance);
+						CommandClientHistory.sendChatHistory(out, server);
 				}
 			} catch (ChatException e)
 			{

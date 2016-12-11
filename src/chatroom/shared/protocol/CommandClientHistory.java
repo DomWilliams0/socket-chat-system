@@ -1,8 +1,8 @@
 package chatroom.shared.protocol;
 
-import chatroom.server.ChatServer;
-import chatroom.shared.Message;
+import chatroom.server.ServerState;
 import chatroom.shared.ChatException;
+import chatroom.shared.Message;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -16,7 +16,7 @@ public class CommandClientHistory extends Command
 		super(Opcode.HIST, username);
 	}
 
-	public static void sendChatHistory(BufferedWriter out, ChatServer serverInstance) throws ChatException
+	public static void sendChatHistory(BufferedWriter out, ServerState serverInstance) throws ChatException
 	{
 		List<Message> history = serverInstance.getMessageHistory();
 		int historySize = history.size();

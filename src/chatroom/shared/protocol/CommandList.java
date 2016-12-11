@@ -1,6 +1,6 @@
 package chatroom.shared.protocol;
 
-import chatroom.server.ChatServer;
+import chatroom.server.ServerState;
 import chatroom.shared.ChatException;
 
 import java.io.BufferedReader;
@@ -13,7 +13,7 @@ public class CommandList extends Command
 		super(Opcode.LIST, username);
 	}
 
-	public static void sendUserList(BufferedWriter out, ChatServer server) throws ChatException
+	public static void sendUserList(BufferedWriter out, ServerState server) throws ChatException
 	{
 		sendArgument(out, Integer.toString(server.getUserCount()));
 		sendArgument(out, server.getUserList(Protocol.DELIMITER));
