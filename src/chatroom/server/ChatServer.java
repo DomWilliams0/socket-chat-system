@@ -5,10 +5,7 @@ import chatroom.shared.Logger;
 import chatroom.shared.protocol.Protocol;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ChatServer
 {
@@ -33,14 +30,6 @@ public class ChatServer
 		loadChatHistory();
 
 		Runtime.getRuntime().addShutdownHook(new Thread(this::saveChatHistory));
-	}
-
-	public static boolean runServer(int port, String banner)
-	{
-		ChatServer server = new ChatServer(banner);
-		ServerConnection serverConnection = new ServerConnection(server);
-
-		return serverConnection.startListening(port);
 	}
 
 	public String getBanner()
@@ -163,5 +152,24 @@ public class ChatServer
 		{
 			Logger.error("Failed to load chat history: %s", e.getMessage());
 		}
+	}
+
+	public static void main(String[] args)
+	{
+		if (args.length < 3)
+			throw new IllegalArgumentException("Usage: <address> <port> <banner>");
+
+		String address = args[0]; // TODO use
+		Integer port = Integer.parseInt(args[1]);
+
+		String[] bannerArgs = Arrays.copyOfRange(args, 2, args.length);
+		String serverBanner = String.join(" ", bannerArgs);
+
+
+		ChatServer server = new ChatServer(serverBanner);
+		ServerConnection connection = new ServerConnection(server);
+		boolean success = connection.startListening(port);
+
+		System.exit(success ? 0 : 1);
 	}
 }
