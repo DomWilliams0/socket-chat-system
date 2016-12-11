@@ -1,7 +1,7 @@
 package chatroom.client;
 
 import chatroom.client.ui.IInterface;
-import chatroom.server.Message;
+import chatroom.shared.Message;
 import chatroom.shared.ChatException;
 import chatroom.shared.Logger;
 import chatroom.shared.protocol.*;

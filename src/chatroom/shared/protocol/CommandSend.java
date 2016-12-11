@@ -1,6 +1,6 @@
 package chatroom.shared.protocol;
 
-import chatroom.server.Message;
+import chatroom.shared.Message;
 import chatroom.shared.ChatException;
 
 import java.io.BufferedReader;

@@ -1,4 +1,4 @@
-package chatroom.server;
+package chatroom.shared;
 
 import chatroom.shared.protocol.Protocol;
 
@@ -9,7 +9,6 @@ public class Message implements Serializable
 	private String from;
 	private String content;
 	// TODO timestamp
-
 
 	public Message(String from, String content)
 	{

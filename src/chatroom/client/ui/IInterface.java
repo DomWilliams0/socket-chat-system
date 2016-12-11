@@ -1,7 +1,7 @@
 package chatroom.client.ui;
 
 import chatroom.client.ClientConnection;
-import chatroom.server.Message;
+import chatroom.shared.Message;
 
 public interface IInterface
 {
