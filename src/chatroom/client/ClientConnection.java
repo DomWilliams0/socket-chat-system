@@ -1,5 +1,6 @@
 package chatroom.client;
 
+import chatroom.client.ui.IInterface;
 import chatroom.server.Message;
 import chatroom.shared.ChatException;
 import chatroom.shared.Logger;
@@ -12,13 +13,16 @@ import java.util.function.Consumer;
 
 public class ClientConnection
 {
-	private final ChatClient client;
+	private final ClientIdentity identity;
+	private final IInterface ui;
+
 	private BufferedReader in;
 	private BufferedWriter out;
 
-	public ClientConnection(ChatClient client)
+	public ClientConnection(ClientIdentity identity, IInterface ui)
 	{
-		this.client = client;
+		this.identity = identity;
+		this.ui = ui;
 	}
 
 	/**
@@ -78,7 +82,7 @@ public class ClientConnection
 		try
 		{
 			Logger.log("Disconnecting");
-			CommandQuit command = new CommandQuit(client.getUsername());
+			CommandQuit command = new CommandQuit(identity.getUsername());
 			command.send(out);
 
 			out = null;
@@ -93,7 +97,7 @@ public class ClientConnection
 
 	public void sendMessage(String message)
 	{
-		Message m = new Message(client.getUsername(), message);
+		Message m = new Message(identity.getUsername(), message);
 		m.encode();
 
 		CommandSend command = new CommandSend(m);
@@ -110,33 +114,33 @@ public class ClientConnection
 
 	private void sendJoin() throws ChatException
 	{
-		CommandJoin command = new CommandJoin(client.getUsername());
+		CommandJoin command = new CommandJoin(identity.getUsername());
 		command.send(out);
 
 		String ack = CommandAck.readAck(in);
 		if (ack != null)
 		{
-			client.getUI().display(String.format("Error while connecting: %s", ack));
+			ui.display(String.format("Error while connecting: %s", ack));
 			return;
 		}
 
 		// read banner
 		String banner = command.read(in);
-		client.getUI().display(String.format("The server says: %s", banner));
+		ui.display(String.format("The server says: %s", banner));
 	}
 
 	private void sendList() throws ChatException
 	{
-		CommandList command = new CommandList(client.getUsername());
+		CommandList command = new CommandList(identity.getUsername());
 		command.send(out);
 
 		String list = command.read(in);
-		client.getUI().display(list);
+		ui.display(list);
 	}
 
 	private void sendHistory() throws ChatException
 	{
-		CommandClientHistory command = new CommandClientHistory(client.getUsername());
+		CommandClientHistory command = new CommandClientHistory(identity.getUsername());
 		command.send(out);
 
 		List<Message> messages = command.readAndParse(in);
@@ -152,7 +156,7 @@ public class ClientConnection
 
 	private void onReceiveMessage(Message m)
 	{
-		client.getUI().displayMessage(m);
+		ui.displayMessage(m);
 	}
 
 

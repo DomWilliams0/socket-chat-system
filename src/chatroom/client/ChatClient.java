@@ -3,30 +3,16 @@ package chatroom.client;
 import chatroom.client.ui.ConsoleInterface;
 import chatroom.client.ui.GraphicalInterface;
 import chatroom.client.ui.IInterface;
-import chatroom.shared.protocol.Protocol;
 
 public class ChatClient
 {
-	private final String username;
 	private final ClientConnection connection;
 	private final IInterface ui;
 
-	/**
-	 * @param username The client's username to use in the chatroom
-	 * @param ui       The user interface to use
-	 */
-	public ChatClient(String username, IInterface ui)
+	public ChatClient(ClientIdentity identity, IInterface ui)
 	{
-		this.username = username;
 		this.ui = ui;
-
-		if (username == null ||
-			username.length() < 3 ||
-			username.contains(Protocol.DELIMITER) ||
-			username.equals(Protocol.SERVER_USERNAME))
-			throw new IllegalArgumentException("Invalid username");
-
-		this.connection = new ClientConnection(this);
+		this.connection = new ClientConnection(identity, ui);
 	}
 
 	public static void main(String[] args)
@@ -52,15 +38,12 @@ public class ChatClient
 				throw new IllegalArgumentException("UI choice can be either \"gui\" or \"console\"");
 		}
 
-		ChatClient client = new ChatClient(username, ui);
+		ClientIdentity identity = new ClientIdentity(username);
+
+		ChatClient client = new ChatClient(identity, ui);
 		boolean success = client.start(address, port);
 
 		System.exit(success ? 0 : 1);
-	}
-
-	public String getUsername()
-	{
-		return username;
 	}
 
 	public boolean start(String address, int port)
@@ -79,10 +62,4 @@ public class ChatClient
 
 		return true;
 	}
-
-	public IInterface getUI()
-	{
-		return ui;
-	}
-
 }
