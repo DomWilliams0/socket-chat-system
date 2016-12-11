@@ -5,6 +5,7 @@ import chatroom.shared.Logger;
 import chatroom.shared.protocol.*;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -32,16 +33,16 @@ public class ServerConnection
 		}
 	}
 
-	public boolean bind(int port)
+	public boolean bind(String iface, int port)
 	{
 		try
 		{
-			socket = new ServerSocket(port);
+			socket = new ServerSocket(port, 0, InetAddress.getByName(iface));
 			return true;
 
 		} catch (IOException e)
 		{
-			Logger.error("Failed to bind to port %d: %s", port, e.getMessage());
+			Logger.error("Failed to bind to %s:%d: %s", iface, port, e.getMessage());
 			return false;
 		}
 	}
@@ -125,15 +126,15 @@ public class ServerConnection
 		return true;
 	}
 
-	public boolean startListening(int port)
+	public boolean startListening(String iface, int port)
 	{
 		// bind to port
-		if (!bind(port))
+		if (!bind(iface, port))
 		{
 			return false;
 		}
 
-		Logger.log("Listening on port %d", port);
+		Logger.log("Listening on %s:%d", iface, port);
 
 		boolean running = true;
 		while (running)

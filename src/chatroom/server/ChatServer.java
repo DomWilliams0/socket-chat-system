@@ -157,9 +157,9 @@ public class ChatServer
 	public static void main(String[] args)
 	{
 		if (args.length < 3)
-			throw new IllegalArgumentException("Usage: <address> <port> <banner>");
+			throw new IllegalArgumentException("Usage: <interface> <port> <banner>");
 
-		String address = args[0]; // TODO use
+		String iface = args[0];
 		Integer port = Integer.parseInt(args[1]);
 
 		String[] bannerArgs = Arrays.copyOfRange(args, 2, args.length);
@@ -168,7 +168,7 @@ public class ChatServer
 
 		ChatServer server = new ChatServer(serverBanner);
 		ServerConnection connection = new ServerConnection(server);
-		boolean success = connection.startListening(port);
+		boolean success = connection.startListening(iface, port);
 
 		System.exit(success ? 0 : 1);
 	}

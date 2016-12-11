@@ -4,7 +4,6 @@ import chatroom.server.Message;
 import chatroom.shared.ChatException;
 import chatroom.shared.Logger;
 import chatroom.shared.protocol.*;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import java.io.*;
 import java.net.Socket;
