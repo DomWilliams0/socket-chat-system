@@ -38,7 +38,7 @@ public class Message implements Serializable
 
 	public String format()
 	{
-		return String.format("[%s] %s\n", from, content);
+		return String.format("[%s] %s", from, content);
 	}
 
 	@Override

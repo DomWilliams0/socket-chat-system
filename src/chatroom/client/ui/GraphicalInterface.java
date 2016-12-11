@@ -120,7 +120,7 @@ public class GraphicalInterface implements IInterface
 	private void reallyDisplayMessage(String message)
 	{
 		SwingUtilities.invokeLater(() ->
-			history.append(message)
+			history.append(message + "\n")
 		);
 	}
 }

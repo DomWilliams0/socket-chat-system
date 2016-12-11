@@ -19,6 +19,7 @@ public class ConsoleInterface implements IInterface
 	{
 		stream.flush();
 		stream.print(message);
+		stream.print("\n");
 	}
 
 	@Override
