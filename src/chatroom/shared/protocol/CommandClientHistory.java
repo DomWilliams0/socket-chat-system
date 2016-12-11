@@ -8,13 +8,26 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class CommandClientHistory extends Command
 {
 	public CommandClientHistory(String username)
 	{
 		super(Opcode.HIST, username);
+	}
+
+	public static void sendChatHistory(BufferedWriter out, ChatServer serverInstance) throws ChatException
+	{
+		List<Message> history = serverInstance.getMessageHistory();
+		int historySize = history.size();
+
+		sendArgument(out, Integer.toString(historySize));
+
+		for (Message message : history)
+		{
+			sendArgument(out, message.getFrom());
+			sendArgument(out, message.getContent());
+		}
 	}
 
 	public List<Message> readAndParse(BufferedReader in) throws ChatException
@@ -33,19 +46,5 @@ public class CommandClientHistory extends Command
 		}
 
 		return messages;
-	}
-
-	public static void sendChatHistory(BufferedWriter out, ChatServer serverInstance) throws ChatException
-	{
-		List<Message> history = serverInstance.getMessageHistory();
-		int historySize = history.size();
-
-		sendArgument(out, Integer.toString(historySize));
-
-		for (Message message : history)
-		{
-			sendArgument(out, message.getFrom());
-			sendArgument(out, message.getContent());
-		}
 	}
 }

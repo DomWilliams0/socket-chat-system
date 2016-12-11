@@ -12,10 +12,9 @@ import java.util.function.Consumer;
 
 public class ClientConnection
 {
+	private final ChatClient client;
 	private BufferedReader in;
 	private BufferedWriter out;
-
-	private final ChatClient client;
 
 	public ClientConnection(ChatClient client)
 	{

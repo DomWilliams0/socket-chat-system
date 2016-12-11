@@ -5,13 +5,18 @@ import chatroom.shared.ChatException;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.util.Collection;
 
 public class CommandList extends Command
 {
 	public CommandList(String username)
 	{
 		super(Opcode.LIST, username);
+	}
+
+	public static void sendUserList(BufferedWriter out, ChatServer server) throws ChatException
+	{
+		sendArgument(out, Integer.toString(server.getUserCount()));
+		sendArgument(out, server.getUserList(Protocol.DELIMITER));
 	}
 
 	@Override
@@ -33,11 +38,5 @@ public class CommandList extends Command
 		}
 
 		return sb.toString();
-	}
-
-	public static void sendUserList(BufferedWriter out, ChatServer server) throws ChatException
-	{
-		sendArgument(out, Integer.toString(server.getUserCount()));
-		sendArgument(out, server.getUserList(Protocol.DELIMITER));
 	}
 }

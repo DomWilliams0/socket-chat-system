@@ -25,26 +25,6 @@ public class ChatClient
 		this.connection = new ClientConnection(this);
 	}
 
-	public static void main(String[] args)
-	{
-		if (args.length != 3)
-			throw new IllegalArgumentException("Usage: <username> <address> <port>");
-
-		String username = args[0];
-		String address = args[1];
-		Integer port = Integer.parseInt(args[2]);
-
-		ChatClient client = new ChatClient(username);
-		boolean success = client.start(address, port);
-
-		System.exit(success ? 0 : 1);
-	}
-
-	public String getUsername()
-	{
-		return username;
-	}
-
 	/**
 	 * Displays the given message on the UI
 	 */
@@ -87,6 +67,26 @@ public class ChatClient
 		connection.disconnect();
 
 		return true;
+	}
+
+	public String getUsername()
+	{
+		return username;
+	}
+
+	public static void main(String[] args)
+	{
+		if (args.length != 3)
+			throw new IllegalArgumentException("Usage: <username> <address> <port>");
+
+		String username = args[0];
+		String address = args[1];
+		Integer port = Integer.parseInt(args[2]);
+
+		ChatClient client = new ChatClient(username);
+		boolean success = client.start(address, port);
+
+		System.exit(success ? 0 : 1);
 	}
 
 }

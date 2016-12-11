@@ -16,13 +16,6 @@ public class CommandSend extends Command
 		this.message = message;
 	}
 
-	@Override
-	public void send(BufferedWriter out) throws ChatException
-	{
-		super.send(out);
-		sendArgument(out, message.getContent());
-	}
-
 	public static Message readMessageFromClient(BufferedReader in, String sender) throws ChatException
 	{
 		return new Message(sender, readMessageContent(in));
@@ -31,5 +24,12 @@ public class CommandSend extends Command
 	public static String readMessageContent(BufferedReader in) throws ChatException
 	{
 		return readArgument(in);
+	}
+
+	@Override
+	public void send(BufferedWriter out) throws ChatException
+	{
+		super.send(out);
+		sendArgument(out, message.getContent());
 	}
 }

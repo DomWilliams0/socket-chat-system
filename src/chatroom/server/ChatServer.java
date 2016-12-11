@@ -32,6 +32,25 @@ public class ChatServer
 		Runtime.getRuntime().addShutdownHook(new Thread(this::saveChatHistory));
 	}
 
+	public static void main(String[] args)
+	{
+		if (args.length < 3)
+			throw new IllegalArgumentException("Usage: <interface> <port> <banner>");
+
+		String iface = args[0];
+		Integer port = Integer.parseInt(args[1]);
+
+		String[] bannerArgs = Arrays.copyOfRange(args, 2, args.length);
+		String serverBanner = String.join(" ", bannerArgs);
+
+
+		ChatServer server = new ChatServer(serverBanner);
+		ServerConnection connection = new ServerConnection(server);
+		boolean success = connection.startListening(iface, port);
+
+		System.exit(success ? 0 : 1);
+	}
+
 	public String getBanner()
 	{
 		return banner;
@@ -152,24 +171,5 @@ public class ChatServer
 		{
 			Logger.error("Failed to load chat history: %s", e.getMessage());
 		}
-	}
-
-	public static void main(String[] args)
-	{
-		if (args.length < 3)
-			throw new IllegalArgumentException("Usage: <interface> <port> <banner>");
-
-		String iface = args[0];
-		Integer port = Integer.parseInt(args[1]);
-
-		String[] bannerArgs = Arrays.copyOfRange(args, 2, args.length);
-		String serverBanner = String.join(" ", bannerArgs);
-
-
-		ChatServer server = new ChatServer(serverBanner);
-		ServerConnection connection = new ServerConnection(server);
-		boolean success = connection.startListening(iface, port);
-
-		System.exit(success ? 0 : 1);
 	}
 }
