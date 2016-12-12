@@ -10,16 +10,28 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+/**
+ * Represents networking for the server
+ */
 public class ServerConnection
 {
 	private ServerSocket socket;
 	private ServerState server;
 
+	/**
+	 * @param server The server
+	 */
 	public ServerConnection(ServerState server)
 	{
 		this.server = server;
 	}
 
+	/**
+	 * Sends a message to the given client
+	 *
+	 * @param client  The client to send the message to
+	 * @param message The message to send
+	 */
 	static void sendMessageToClient(ClientInstance client, Message message)
 	{
 		try
@@ -34,6 +46,13 @@ public class ServerConnection
 		}
 	}
 
+	/**
+	 * Attempts to bind to the given address
+	 *
+	 * @param iface The interface to bind to
+	 * @param port  The port to bind to
+	 * @return If binding was successful
+	 */
 	public boolean bind(String iface, int port)
 	{
 		try
@@ -48,6 +67,11 @@ public class ServerConnection
 		}
 	}
 
+	/**
+	 * Reads and handles join commands from the given client socket
+	 *
+	 * @param client A client's spanking new socket
+	 */
 	private void handleConnection(Socket client) throws ChatException
 	{
 		try
@@ -67,6 +91,13 @@ public class ServerConnection
 		}
 	}
 
+	/**
+	 * Handles join commands from the given client
+	 *
+	 * @param username The client's username
+	 * @param in       The client's input stream
+	 * @param out      The client's output stream
+	 */
 	private void handleJoin(String username, BufferedReader in, BufferedWriter out) throws ChatException
 	{
 		ChatException error = null;
@@ -91,6 +122,11 @@ public class ServerConnection
 		CommandJoin.sendBanner(out, server.getBanner());
 	}
 
+	/**
+	 * Blocks until a client connects, and closes the socket when they disconnect
+	 *
+	 * @return If handling the client was a success
+	 */
 	private boolean acceptClient()
 	{
 		Socket client = null;
@@ -127,6 +163,13 @@ public class ServerConnection
 		return true;
 	}
 
+	/**
+	 * Bind to and serve on the given address
+	 *
+	 * @param iface The interface to bind to
+	 * @param port  The port to bind to
+	 * @return If binding was successful
+	 */
 	public boolean startListening(String iface, int port)
 	{
 		// bind to port
@@ -147,6 +190,9 @@ public class ServerConnection
 		return true;
 	}
 
+	/**
+	 * Close the server socket
+	 */
 	public void shutdown()
 	{
 		Logger.log("Shutting down server");
@@ -163,6 +209,10 @@ public class ServerConnection
 		}
 	}
 
+	/**
+	 * @param socket A client
+	 * @return String representation of the client's address
+	 */
 	private String getClientAddress(Socket socket)
 	{
 		return socket.getRemoteSocketAddress().toString();

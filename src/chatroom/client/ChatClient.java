@@ -10,6 +10,10 @@ public class ChatClient
 	private final ClientConnection connection;
 	private final IInterface ui;
 
+	/**
+	 * @param identity The client's identity
+	 * @param ui       The client's UI
+	 */
 	public ChatClient(ClientIdentity identity, IInterface ui)
 	{
 		this.ui = ui;
@@ -57,6 +61,13 @@ public class ChatClient
 		System.exit(success ? 0 : 1);
 	}
 
+	/**
+	 * Connects to the server and starts the UI
+	 *
+	 * @param address The server address
+	 * @param port    The server port
+	 * @return If the client successfully connected to the server
+	 */
 	public boolean start(String address, int port)
 	{
 		// connect to server

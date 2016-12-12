@@ -11,6 +11,9 @@ import java.awt.event.WindowEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
+/**
+ * Represents a simple graphical UI
+ */
 public class GraphicalInterface implements IInterface
 {
 	private final java.util.List<String> buffer;
@@ -108,6 +111,9 @@ public class GraphicalInterface implements IInterface
 		}
 	}
 
+	/**
+	 * Displays the given string if the UI has been fully initialised, otherwise adds it to a buffer
+	 */
 	@Override
 	public void display(String message)
 	{
@@ -117,6 +123,9 @@ public class GraphicalInterface implements IInterface
 			reallyDisplayMessage(message);
 	}
 
+	/**
+	 * Actually displays the given string on the UI
+	 */
 	private void reallyDisplayMessage(String message)
 	{
 		SwingUtilities.invokeLater(() ->

@@ -3,7 +3,7 @@ package chatroom.server;
 import chatroom.shared.ChatException;
 import chatroom.shared.Logger;
 import chatroom.shared.Message;
-import chatroom.shared.protocol.Protocol;
+import chatroom.shared.protocol.Command;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Represents a server's state
+ */
 public class ServerState
 {
 	private static final String CHAT_HISTORY_FILE = "chat_history.ser";
@@ -20,6 +23,11 @@ public class ServerState
 	private final Map<String, ClientInstance> clients;
 	private final List<Message> messageHistory;
 
+	/**
+	 * Previous chat history will be loaded from CHAT_HISTORY_FILE, if it exists
+	 *
+	 * @param banner An optional message to send to clients on connecting
+	 */
 	public ServerState(String banner)
 	{
 		if (banner == null)
@@ -36,11 +44,22 @@ public class ServerState
 		Runtime.getRuntime().addShutdownHook(new Thread(this::saveChatHistory));
 	}
 
+	/**
+	 * @return The server banner
+	 */
 	public String getBanner()
 	{
 		return banner;
 	}
 
+	/**
+	 * Adds the given client to the server
+	 *
+	 * @param username The client's username
+	 * @param in       The client's input stream reader
+	 * @param out      The client's output stream writer
+	 * @throws ChatException If the client should be rejected
+	 */
 	public void addClient(String username, BufferedReader in, BufferedWriter out) throws ChatException
 	{
 		// username already exists
@@ -58,6 +77,11 @@ public class ServerState
 		Logger.log("%s connected", username);
 	}
 
+	/**
+	 * Removes the given client from the server
+	 *
+	 * @param username The client's username
+	 */
 	public void removeClient(String username)
 	{
 		ClientInstance connection = clients.remove(username);
@@ -82,14 +106,24 @@ public class ServerState
 		}
 	}
 
+	/**
+	 * Broadcasts the given string to all clients from the reserved server "user"
+	 *
+	 * @param message The string to broadcast
+	 */
 	public void broadcastServerMessage(String message)
 	{
-		Message m = new Message(Protocol.SERVER_USERNAME, message);
+		Message m = new Message(Command.SERVER_USERNAME, message);
 		m.encode();
 
 		broadcastMessage(m);
 	}
 
+	/**
+	 * Broadcasts the given message to all clients
+	 *
+	 * @param message The message to broadcast
+	 */
 	public void broadcastMessage(Message message)
 	{
 		for (ClientInstance client : clients.values())
@@ -98,6 +132,12 @@ public class ServerState
 		addMessageToHistory(message);
 	}
 
+	/**
+	 * Adds the given message to the chat history
+	 * History will be saved to file once the buffer is filled
+	 *
+	 * @param message The message to save
+	 */
 	private void addMessageToHistory(Message message)
 	{
 		messageHistory.add(message);
@@ -106,11 +146,18 @@ public class ServerState
 			saveChatHistory();
 	}
 
+	/**
+	 * @return The number of users connected to the server
+	 */
 	public int getUserCount()
 	{
 		return clients.size();
 	}
 
+	/**
+	 * @param delimiter The delimiter for the returned list of usernames
+	 * @return The list of clients connected to the server, separated by the given delimiter
+	 */
 	public String getUserList(String delimiter)
 	{
 		StringBuilder sb = new StringBuilder(100);
@@ -120,12 +167,18 @@ public class ServerState
 		return sb.toString().trim();
 	}
 
+	/**
+	 * @return The full message history
+	 */
 	public List<Message> getMessageHistory()
 	{
 		return messageHistory;
 	}
 
-	public void saveChatHistory()
+	/**
+	 * Saves the chat history buffer to file
+	 */
+	private void saveChatHistory()
 	{
 		try
 		{
@@ -140,6 +193,9 @@ public class ServerState
 		}
 	}
 
+	/**
+	 * Loads the chat history from file
+	 */
 	public void loadChatHistory()
 	{
 		int count = 0;

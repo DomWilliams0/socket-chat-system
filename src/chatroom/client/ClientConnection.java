@@ -11,6 +11,9 @@ import java.net.Socket;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * Represents a client's connection to a server
+ */
 public class ClientConnection
 {
 	private final ClientIdentity identity;
@@ -19,6 +22,10 @@ public class ClientConnection
 	private BufferedReader in;
 	private BufferedWriter out;
 
+	/**
+	 * @param identity The client's identity
+	 * @param ui       The UI to use
+	 */
 	public ClientConnection(ClientIdentity identity, IInterface ui)
 	{
 		this.identity = identity;
@@ -75,6 +82,9 @@ public class ClientConnection
 		return success;
 	}
 
+	/**
+	 * Disconnect from the server, if connected
+	 */
 	public void disconnect()
 	{
 		if (out == null && in == null)
@@ -96,6 +106,9 @@ public class ClientConnection
 	}
 
 
+	/**
+	 * @param message Send the message to the server, and in effect to all other clients connected to the server
+	 */
 	public void sendMessage(String message)
 	{
 		if (message.isEmpty())
@@ -116,6 +129,11 @@ public class ClientConnection
 		// no ack needed for now
 	}
 
+	/**
+	 * Attempts to join the server
+	 *
+	 * @return If the server accepted the connection
+	 */
 	private boolean sendJoin() throws ChatException
 	{
 		CommandJoin command = new CommandJoin(identity.getUsername());
@@ -134,6 +152,9 @@ public class ClientConnection
 		return true;
 	}
 
+	/**
+	 * Requests the list of connected clients from the server and displays it on the UI
+	 */
 	private void sendList() throws ChatException
 	{
 		CommandList command = new CommandList(identity.getUsername());
@@ -143,6 +164,9 @@ public class ClientConnection
 		ui.display(list);
 	}
 
+	/**
+	 * Requests the full history of sent messages from the server
+	 */
 	private void sendHistory() throws ChatException
 	{
 		CommandClientHistory command = new CommandClientHistory(identity.getUsername());
@@ -152,6 +176,9 @@ public class ClientConnection
 		messages.forEach(this::onReceiveMessage);
 	}
 
+	/**
+	 * Spawn a thread to listen for messages sent from the server to this client
+	 */
 	private void startReceivingThread()
 	{
 		Thread thread = new Thread(new ClientMessageReceiver(in, this::onReceiveMessage));
@@ -159,17 +186,29 @@ public class ClientConnection
 		thread.start();
 	}
 
+	/**
+	 * Callback for received messages from the server
+	 *
+	 * @param m The received message
+	 */
 	private void onReceiveMessage(Message m)
 	{
 		ui.displayMessage(m);
 	}
 
 
+	/**
+	 * Runnable that parses all communication from the server
+	 */
 	private class ClientMessageReceiver implements Runnable
 	{
 		private final BufferedReader instream;
 		private final Consumer<Message> onReceiveMessage;
 
+		/**
+		 * @param instream         The stream to read from
+		 * @param onReceiveMessage Message callback
+		 */
 		ClientMessageReceiver(BufferedReader instream, Consumer<Message> onReceiveMessage)
 		{
 			this.instream = instream;

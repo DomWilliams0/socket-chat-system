@@ -8,6 +8,9 @@ public class ChatServer
 {
 	private final ServerConnection connection;
 
+	/**
+	 * @param state The server state
+	 */
 	public ChatServer(ServerState state)
 	{
 		this.connection = new ServerConnection(state);
@@ -19,7 +22,6 @@ public class ChatServer
 
 		try
 		{
-
 			if (args.length < 3)
 				throw new IllegalArgumentException("Usage: <interface> <port> <banner>");
 
@@ -43,6 +45,13 @@ public class ChatServer
 		System.exit(success ? 0 : 1);
 	}
 
+	/**
+	 * Starts the server on the given address
+	 *
+	 * @param iface The interface to listen on
+	 * @param port  The port to listen on
+	 * @return If the server started up properly
+	 */
 	private boolean start(String iface, Integer port)
 	{
 		return connection.startListening(iface, port);

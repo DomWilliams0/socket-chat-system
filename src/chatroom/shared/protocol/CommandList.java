@@ -16,7 +16,7 @@ public class CommandList extends Command
 	public static void sendUserList(BufferedWriter out, ServerState server) throws ChatException
 	{
 		sendArgument(out, Integer.toString(server.getUserCount()));
-		sendArgument(out, server.getUserList(Protocol.DELIMITER));
+		sendArgument(out, server.getUserList(Command.DELIMITER));
 	}
 
 	@Override

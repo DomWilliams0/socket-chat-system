@@ -3,15 +3,21 @@ package chatroom.client.ui;
 import chatroom.client.ClientConnection;
 
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.Scanner;
 
+/**
+ * Represents a simple command line UI
+ */
 public class ConsoleInterface implements IInterface
 {
 	private final PrintStream out;
 	private final InputStream in;
 
+	/**
+	 * @param out The stream to write output to
+	 * @param in  The stream to read input from
+	 */
 	public ConsoleInterface(PrintStream out, InputStream in)
 	{
 		this.out = out;

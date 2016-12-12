@@ -8,12 +8,19 @@ import chatroom.shared.protocol.*;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 
+/**
+ * Runnable to receive and handle commands from a single client
+ */
 public class ServerMessageReceiver implements Runnable
 {
 	private final ClientInstance clientInstance;
 	private final ServerState server;
 
-	public ServerMessageReceiver(ClientInstance clientInstance, ServerState server)
+	/**
+	 * @param clientInstance The client to listen to
+	 * @param server         The server
+	 */
+	ServerMessageReceiver(ClientInstance clientInstance, ServerState server)
 	{
 		this.clientInstance = clientInstance;
 		this.server = server;

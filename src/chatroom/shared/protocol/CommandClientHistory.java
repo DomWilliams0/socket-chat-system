@@ -9,6 +9,9 @@ import java.io.BufferedWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a chat history request
+ */
 public class CommandClientHistory extends Command
 {
 	public CommandClientHistory(String username)
@@ -16,6 +19,12 @@ public class CommandClientHistory extends Command
 		super(Opcode.HIST, username);
 	}
 
+	/**
+	 * Writes the given server's full chat history to the given writer
+	 *
+	 * @param out            The writer
+	 * @param serverInstance The server
+	 */
 	public static void sendChatHistory(BufferedWriter out, ServerState serverInstance) throws ChatException
 	{
 		List<Message> history = serverInstance.getMessageHistory();
@@ -30,6 +39,12 @@ public class CommandClientHistory extends Command
 		}
 	}
 
+	/**
+	 * Reads chat history from the given reader and parses into separate messages
+	 *
+	 * @param in The reader
+	 * @return List of parsed messages
+	 */
 	public List<Message> readAndParse(BufferedReader in) throws ChatException
 	{
 		List<Message> messages = new ArrayList<>();
