@@ -142,6 +142,7 @@ public class ServerState
 
 	public void loadChatHistory()
 	{
+		int count = 0;
 		try
 		{
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(CHAT_HISTORY_FILE));
@@ -149,12 +150,15 @@ public class ServerState
 			ArrayList<Message> newHistory = (ArrayList<Message>) ois.readObject();
 			messageHistory.clear();
 			messageHistory.addAll(newHistory);
-			Logger.log("Loaded %d messages into chat history from %s", newHistory.size(), CHAT_HISTORY_FILE);
+			count = newHistory.size();
 
 			ois.close();
 		} catch (IOException | ClassNotFoundException e)
 		{
-			Logger.error("Failed to load chat history: %s", e.getMessage());
+			if (!(e instanceof FileNotFoundException))
+				Logger.error("Failed to load chat history: %s", e.getMessage());
 		}
+
+		Logger.log("Loaded %d messages into chat history from %s", count, CHAT_HISTORY_FILE);
 	}
 }
