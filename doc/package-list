@@ -1,0 +1,5 @@
+chatroom.client
+chatroom.client.ui
+chatroom.server
+chatroom.shared
+chatroom.shared.protocol
