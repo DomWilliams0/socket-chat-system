@@ -97,6 +97,9 @@ public class ClientConnection
 
 	public void sendMessage(String message)
 	{
+		if (message.isEmpty())
+			return;
+
 		Message m = new Message(identity.getUsername(), message);
 		m.encode();
 
