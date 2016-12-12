@@ -1,5 +1,7 @@
 package chatroom.server;
 
+import chatroom.shared.Logger;
+
 import java.util.Arrays;
 
 public class ChatServer
@@ -13,19 +15,30 @@ public class ChatServer
 
 	public static void main(String[] args)
 	{
-		if (args.length < 3)
-			throw new IllegalArgumentException("Usage: <interface> <port> <banner>");
+		boolean success;
 
-		String iface = args[0];
-		Integer port = Integer.parseInt(args[1]);
+		try
+		{
 
-		String[] bannerArgs = Arrays.copyOfRange(args, 2, args.length);
-		String serverBanner = String.join(" ", bannerArgs);
+			if (args.length < 3)
+				throw new IllegalArgumentException("Usage: <interface> <port> <banner>");
 
-		ServerState state = new ServerState(serverBanner);
-		ChatServer server = new ChatServer(state);
+			String iface = args[0];
+			Integer port = Integer.parseInt(args[1]);
 
-		boolean success = server.start(iface, port);
+			String[] bannerArgs = Arrays.copyOfRange(args, 2, args.length);
+			String serverBanner = String.join(" ", bannerArgs);
+
+			ServerState state = new ServerState(serverBanner);
+			ChatServer server = new ChatServer(state);
+
+			success = server.start(iface, port);
+
+		} catch (IllegalArgumentException e)
+		{
+			Logger.error(e.getMessage());
+			success = false;
+		}
 
 		System.exit(success ? 0 : 1);
 	}
