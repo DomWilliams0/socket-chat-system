@@ -37,7 +37,7 @@ public class ChatClient
 					ui = new GraphicalInterface();
 					break;
 				case "console":
-					ui = new ConsoleInterface(System.out);
+					ui = new ConsoleInterface(System.out, System.in);
 					break;
 				default:
 					throw new IllegalArgumentException("UI choice can be either \"gui\" or \"console\"");
