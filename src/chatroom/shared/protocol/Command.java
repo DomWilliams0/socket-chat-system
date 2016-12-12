@@ -95,14 +95,14 @@ public abstract class Command
 	 * @return The parsed prologue
 	 * @throws IllegalArgumentException If the parsed opcode is not in the provided subset of expected opcodes
 	 */
-	public static RequestPrologue readPrologue(BufferedReader in, Opcode... expectedOpcodes) throws ChatException, IllegalArgumentException
+	public static RequestPrologue readPrologue(BufferedReader in, Opcode... expectedOpcodes) throws ChatException
 	{
 		// read opcode
 		Opcode opcode = readOpcode(in);
 
 		// validate opcode
 		if (expectedOpcodes != null && !Arrays.asList(expectedOpcodes).contains(opcode))
-			throw new IllegalArgumentException("Unexpected opcode " + opcode);
+			return null;
 
 		// read username
 		String username = readArgument(in);

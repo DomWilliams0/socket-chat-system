@@ -43,6 +43,12 @@ public class ServerMessageReceiver implements Runnable
 				RequestPrologue request = Command.readPrologue(in,
 					Opcode.QUIT, Opcode.SEND, Opcode.LIST, Opcode.HIST);
 
+				if (request == null)
+				{
+					Logger.error("Unexpected opcode");
+					continue;
+				}
+
 				// validate sender
 				if (!username.equals(request.getUsername()))
 				{

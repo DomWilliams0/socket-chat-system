@@ -81,9 +81,12 @@ public class ServerConnection
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
 
 			RequestPrologue prologue = Command.readPrologue(in, Opcode.JOIN);
-			Logger.log("User '%s' connected from %s", prologue.getUsername(), getClientAddress(client));
 
-			handleJoin(prologue.getUsername(), in, out);
+			if (prologue != null)
+			{
+				Logger.log("User '%s' connected from %s", prologue.getUsername(), getClientAddress(client));
+				handleJoin(prologue.getUsername(), in, out);
+			}
 
 		} catch (IOException e)
 		{

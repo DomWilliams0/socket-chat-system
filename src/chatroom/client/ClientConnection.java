@@ -226,6 +226,8 @@ public class ClientConnection
 				try
 				{
 					RequestPrologue request = Command.readPrologue(instream, Opcode.SEND);
+					if (request == null)
+						continue;
 
 					String encodedMessage = CommandSend.readMessageContent(instream);
 					Message m = new Message(request.getUsername(), encodedMessage);
