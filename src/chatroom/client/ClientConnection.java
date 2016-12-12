@@ -47,21 +47,22 @@ public class ClientConnection
 			Logger.log("Successfully connected");
 
 			// send join command
-			sendJoin();
+			if (sendJoin())
+			{
+				// register signal handler
+				Runtime.getRuntime().addShutdownHook(new Thread(this::disconnect));
 
-			// register signal handler
-			Runtime.getRuntime().addShutdownHook(new Thread(this::disconnect));
+				// request user list
+				sendList();
 
-			// request user list
-			sendList();
+				// request history
+				sendHistory();
 
-			// request history
-			sendHistory();
+				// start receiving thread
+				startReceivingThread();
 
-			// start receiving thread
-			startReceivingThread();
-
-			success = true;
+				success = true;
+			}
 
 		} catch (IOException e)
 		{
@@ -115,7 +116,7 @@ public class ClientConnection
 		// no ack needed for now
 	}
 
-	private void sendJoin() throws ChatException
+	private boolean sendJoin() throws ChatException
 	{
 		CommandJoin command = new CommandJoin(identity.getUsername());
 		command.send(out);
@@ -124,12 +125,13 @@ public class ClientConnection
 		if (ack != null)
 		{
 			ui.display(String.format("Error while connecting: %s", ack));
-			return;
+			return false;
 		}
 
 		// read banner
 		String banner = command.read(in);
 		ui.display(String.format("The server says: %s", banner));
+		return true;
 	}
 
 	private void sendList() throws ChatException

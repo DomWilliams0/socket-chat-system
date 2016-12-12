@@ -85,7 +85,7 @@ public class ServerConnection
 
 		// error; abort
 		if (error != null)
-			return;
+			throw error;
 
 		// send banner
 		CommandJoin.sendBanner(out, server.getBanner());
